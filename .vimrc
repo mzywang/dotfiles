@@ -19,3 +19,5 @@ set smartindent
 " Show absolute and relative line numbers
 set number
 set relativenumber
+
+command! CopyRelPath let @+ = expand('%')

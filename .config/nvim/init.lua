@@ -19,6 +19,10 @@ vim.cmd("syntax on")
 vim.cmd("filetype plugin indent on")
 vim.cmd.colorscheme("habamax")
 
+vim.api.nvim_create_user_command("CopyRelPath", function()
+  vim.fn.setreg("+", vim.fn.expand("%"))
+end, {})
+
 require("lazy").setup({
   {
     "lewis6991/gitsigns.nvim",
