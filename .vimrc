@@ -15,3 +15,7 @@ set autoindent
 
 " Enable smart indentation (context-aware)
 set smartindent
+
+" Show absolute and relative line numbers
+set number
+set relativenumber
