@@ -1,0 +1,17 @@
+" Use spaces instead of tabs
+set expandtab
+
+" Set the number of spaces for each indentation level
+set shiftwidth=4
+
+" Set the number of spaces for a tab character
+set tabstop=4
+
+" Set the number of spaces for a tab in insert mode
+set softtabstop=4
+
+" Enable auto-indentation
+set autoindent
+
+" Enable smart indentation (context-aware)
+set smartindent
