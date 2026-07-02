@@ -23,11 +23,30 @@ vim.api.nvim_create_user_command("CopyRelPath", function()
   vim.fn.setreg("+", vim.fn.expand("%"))
 end, {})
 
+vim.api.nvim_create_user_command("CopyPwd", function()
+  vim.fn.setreg("+", vim.fn.getcwd())
+  print("copied cwd")
+end, {})
+
 require("lazy").setup({
   {
     "lewis6991/gitsigns.nvim",
     opts = {
       current_line_blame = true,
+    },
+  },
+
+  {
+    "lukas-reineke/indent-blankline.nvim",
+    main = "ibl",
+    opts = {
+      indent = {
+        char = "│",
+        tab_char = "│",
+      },
+      scope = {
+        enabled = true,
+      },
     },
   },
 })
