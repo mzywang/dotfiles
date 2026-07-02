@@ -2,10 +2,11 @@
 # Edit this list to add or remove dependencies; bootstrap.sh reads from it.
 
 # Regular formulae, always installed (brew install is idempotent).
+# Version snapshots are informational — Homebrew installs the current version.
 formulae:
-  - neovim
-  - zsh
-  - zsh-autosuggestions
+  - neovim              # snapshot: 0.11.6
+  - zsh                 # not brew-installed on snapshot machine (system /bin/zsh)
+  - zsh-autosuggestions # snapshot: 0.7.1
 
 # Installed only if the command on the left isn't already on PATH.
 # Format per entry: "command=formula".
