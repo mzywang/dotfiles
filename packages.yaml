@@ -5,14 +5,14 @@
 # Version snapshots are informational — Homebrew installs the current version.
 formulae:
   - neovim              # snapshot: 0.11.6
-  - zsh                 # not brew-installed on snapshot machine (system /bin/zsh)
+  - zsh                 # snapshot: 5.9.1
   - zsh-autosuggestions # snapshot: 0.7.1
+  - vim                 # snapshot: 9.2.0750
 
 # Installed only if the command on the left isn't already on PATH.
-# Format per entry: "command=formula".
-formulae_if_missing:
-  - vim=vim
+# Format per entry: "command=formula".  (none currently)
+formulae_if_missing: []
 
 # GUI apps installed via `brew install --cask`.
 casks:
-  - cmux
+  - cmux                # snapshot: 0.64.17 (self-updating app; not brew-managed on snapshot machine)
