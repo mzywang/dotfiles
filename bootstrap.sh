@@ -40,6 +40,11 @@ fi
 echo "==> zsh"
 brew install zsh
 
+# --- zsh-autosuggestions ------------------------------------------------------
+# Sourced directly from Homebrew's share dir in .zshrc.
+echo "==> zsh-autosuggestions"
+brew install zsh-autosuggestions
+
 # --- cmux (cask) --------------------------------------------------------------
 echo "==> cmux"
 brew install --cask cmux
