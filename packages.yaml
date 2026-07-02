@@ -1,6 +1,10 @@
 # Homebrew packages installed by bootstrap.sh — the single source of truth.
 # Edit this list to add or remove dependencies; bootstrap.sh reads from it.
 
+# Third-party taps to add before installing (needed by some casks below).
+taps:
+  - manaflow-ai/cmux
+
 # Regular formulae, always installed (brew install is idempotent).
 # Version snapshots are informational — Homebrew installs the current version.
 formulae:
@@ -14,5 +18,6 @@ formulae:
 formulae_if_missing: []
 
 # GUI apps installed via `brew install --cask`.
+# Fully-qualified token avoids collision with the unrelated homebrew-cask "cmux".
 casks:
-  - cmux                # snapshot: 0.64.17 (self-updating app; not brew-managed on snapshot machine)
+  - manaflow-ai/cmux/cmux   # snapshot: 0.64.17

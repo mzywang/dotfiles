@@ -45,6 +45,12 @@ fi
 echo "==> Updating Homebrew"
 brew update
 
+# --- Taps ---------------------------------------------------------------------
+while IFS= read -r tap; do
+  echo "==> tap $tap"
+  brew tap "$tap"
+done < <(yaml_list taps)
+
 # --- Formulae -----------------------------------------------------------------
 while IFS= read -r formula; do
   echo "==> $formula"
