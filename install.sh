@@ -13,7 +13,7 @@ DOTFILES_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 
 # Repo files that should NOT be linked into $HOME.
-EXCLUDES=("install.sh" "README.md" ".gitignore")
+EXCLUDES=("install.sh" "bootstrap.sh" "README.md" ".gitignore")
 
 is_excluded() {
   local f="$1" e
