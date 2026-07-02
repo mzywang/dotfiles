@@ -1,0 +1,17 @@
+# Homebrew packages installed by bootstrap.sh — the single source of truth.
+# Edit this list to add or remove dependencies; bootstrap.sh reads from it.
+
+# Regular formulae, always installed (brew install is idempotent).
+formulae:
+  - neovim
+  - zsh
+  - zsh-autosuggestions
+
+# Installed only if the command on the left isn't already on PATH.
+# Format per entry: "command=formula".
+formulae_if_missing:
+  - vim=vim
+
+# GUI apps installed via `brew install --cask`.
+casks:
+  - cmux
