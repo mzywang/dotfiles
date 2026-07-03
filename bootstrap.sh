@@ -30,9 +30,14 @@ yaml_list() {
 
 [[ -f "$PACKAGES_FILE" ]] || { echo "error: $PACKAGES_FILE not found" >&2; exit 1; }
 
+# Run unattended: skip Homebrew's "press RETURN to continue" prompt and its
+# post-install environment hints.
+export NONINTERACTIVE=1
+export HOMEBREW_NO_ENV_HINTS=1
+
 # --- Homebrew -----------------------------------------------------------------
 if ! command -v brew >/dev/null 2>&1; then
-  echo "==> Installing Homebrew"
+  echo "==> Installing Homebrew (may prompt once for your macOS password)"
   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
   # Make brew available in this shell session.
   if [[ -x /opt/homebrew/bin/brew ]]; then
