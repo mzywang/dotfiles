@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal macOS dotfiles: zsh + Powerlevel10k, Neovim, Vim, and Ghostty.
+Personal macOS dotfiles: zsh + Powerlevel10k, Neovim, Vim, Ghostty, and cmux.
 
 ## Set up a new machine
 
@@ -21,7 +21,8 @@ zsh-autosuggestions, and cmux. Safe to re-run; `brew install` is idempotent.
 ### 2. `install.sh` — link configs
 
 Symlinks each tracked dotfile into `$HOME` at its matching path
-(`.zshrc`, `.p10k.zsh`, `.vimrc`, `.config/nvim/*`, `.config/ghostty/config`).
+(`.zshrc`, `.p10k.zsh`, `.vimrc`, `.config/nvim/*`, `.config/ghostty/config`,
+`.config/cmux/cmux.json`).
 Anything already at those paths is backed up to `~/.dotfiles-backup/<timestamp>/`
 first. Also seeds `~/.zshrc.local` (see Secrets below). Safe to re-run.
 
@@ -60,6 +61,7 @@ the file directly (no `yq` required).
 | `.vimrc` | Vim config |
 | `.config/nvim/` | Neovim config + `lazy-lock.json` plugin lockfile |
 | `.config/ghostty/config` | Ghostty terminal config |
+| `.config/cmux/cmux.json` | cmux config (JSONC) |
 | `packages.yaml` | Homebrew taps / formulae / casks |
 | `bootstrap.sh` | Installs software from `packages.yaml` |
 | `install.sh` | Symlinks configs into `$HOME` |
