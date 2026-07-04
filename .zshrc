@@ -28,5 +28,19 @@ alias pcs="peach commit status"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
 
+# Keep the input line one row above the bottom of the terminal instead of flush
+# against it. Before each prompt, scroll up by the full height of the prompt
+# block and move the cursor back up, shifting the whole block up one row so a
+# blank line is left beneath the `❯` input line. Uses real newlines, so terminal
+# scrollback is preserved. The count must match the prompt height: 2 prompt
+# lines + 1 for POWERLEVEL9K_PROMPT_ADD_NEWLINE. Bump it if you change either.
+autoload -Uz add-zsh-hook
+_reserve_bottom_line() {
+  local reserve=4
+  printf '\n%.0s' {1..$reserve}
+  tput cuu $reserve
+}
+add-zsh-hook precmd _reserve_bottom_line
+
 # Machine-specific secrets and overrides (not tracked in git).
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
