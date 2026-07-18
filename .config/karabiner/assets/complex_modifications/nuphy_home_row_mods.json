@@ -10,8 +10,8 @@
                     "to": [{ "key_code": "left_command" }],
                     "to_if_alone": [{ "key_code": "a" }],
                     "parameters": {
-                        "basic.to_if_held_down_threshold_milliseconds": 220,
-                        "basic.to_if_alone_timeout_milliseconds": 220
+                        "basic.to_if_held_down_threshold_milliseconds": 280,
+                        "basic.to_if_alone_timeout_milliseconds": 280
                     },
                     "conditions": [
                         {
@@ -29,8 +29,8 @@
                     "to": [{ "key_code": "left_option" }],
                     "to_if_alone": [{ "key_code": "r" }],
                     "parameters": {
-                        "basic.to_if_held_down_threshold_milliseconds": 220,
-                        "basic.to_if_alone_timeout_milliseconds": 220
+                        "basic.to_if_held_down_threshold_milliseconds": 280,
+                        "basic.to_if_alone_timeout_milliseconds": 280
                     },
                     "conditions": [
                         {
@@ -48,8 +48,8 @@
                     "to": [{ "key_code": "left_control" }],
                     "to_if_alone": [{ "key_code": "s" }],
                     "parameters": {
-                        "basic.to_if_held_down_threshold_milliseconds": 220,
-                        "basic.to_if_alone_timeout_milliseconds": 220
+                        "basic.to_if_held_down_threshold_milliseconds": 280,
+                        "basic.to_if_alone_timeout_milliseconds": 280
                     },
                     "conditions": [
                         {
@@ -67,8 +67,8 @@
                     "to": [{ "key_code": "left_shift" }],
                     "to_if_alone": [{ "key_code": "t" }],
                     "parameters": {
-                        "basic.to_if_held_down_threshold_milliseconds": 220,
-                        "basic.to_if_alone_timeout_milliseconds": 220
+                        "basic.to_if_held_down_threshold_milliseconds": 280,
+                        "basic.to_if_alone_timeout_milliseconds": 280
                     },
                     "conditions": [
                         {
@@ -91,8 +91,8 @@
                     "to": [{ "key_code": "right_shift" }],
                     "to_if_alone": [{ "key_code": "n" }],
                     "parameters": {
-                        "basic.to_if_held_down_threshold_milliseconds": 220,
-                        "basic.to_if_alone_timeout_milliseconds": 220
+                        "basic.to_if_held_down_threshold_milliseconds": 280,
+                        "basic.to_if_alone_timeout_milliseconds": 280
                     },
                     "conditions": [
                         {
@@ -110,8 +110,8 @@
                     "to": [{ "key_code": "right_control" }],
                     "to_if_alone": [{ "key_code": "e" }],
                     "parameters": {
-                        "basic.to_if_held_down_threshold_milliseconds": 220,
-                        "basic.to_if_alone_timeout_milliseconds": 220
+                        "basic.to_if_held_down_threshold_milliseconds": 280,
+                        "basic.to_if_alone_timeout_milliseconds": 280
                     },
                     "conditions": [
                         {
@@ -129,8 +129,8 @@
                     "to": [{ "key_code": "right_option" }],
                     "to_if_alone": [{ "key_code": "i" }],
                     "parameters": {
-                        "basic.to_if_held_down_threshold_milliseconds": 220,
-                        "basic.to_if_alone_timeout_milliseconds": 220
+                        "basic.to_if_held_down_threshold_milliseconds": 280,
+                        "basic.to_if_alone_timeout_milliseconds": 280
                     },
                     "conditions": [
                         {
@@ -148,8 +148,8 @@
                     "to": [{ "key_code": "right_command" }],
                     "to_if_alone": [{ "key_code": "o" }],
                     "parameters": {
-                        "basic.to_if_held_down_threshold_milliseconds": 220,
-                        "basic.to_if_alone_timeout_milliseconds": 220
+                        "basic.to_if_held_down_threshold_milliseconds": 280,
+                        "basic.to_if_alone_timeout_milliseconds": 280
                     },
                     "conditions": [
                         {
