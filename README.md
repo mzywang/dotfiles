@@ -63,6 +63,7 @@ the file directly (no `yq` required).
 | `.config/ghostty/config` | Ghostty terminal config |
 | `.config/cmux/cmux.json` | cmux config (JSONC) |
 | `.config/karabiner/assets/complex_modifications/nuphy_home_row_mods.json` | Karabiner-Elements home row mods, scoped to the NuPhy Air75 V3 keyboard |
+| `.config/karabiner/assets/complex_modifications/disable_command_tab.json` | Karabiner-Elements rule disabling Command-Tab |
 | `packages.yaml` | Homebrew taps / formulae / casks |
 | `bootstrap.sh` | Installs software from `packages.yaml` |
 | `install.sh` | Symlinks configs into `$HOME` |
