@@ -67,3 +67,17 @@ the file directly (no `yq` required).
 | `packages.yaml` | Homebrew taps / formulae / casks |
 | `bootstrap.sh` | Installs software from `packages.yaml` |
 | `install.sh` | Symlinks configs into `$HOME` |
+
+### Karabiner-Elements rules
+
+`install.sh` only symlinks the rule files into
+`~/.config/karabiner/assets/complex_modifications/` — two manual steps are
+still needed in the Karabiner-Elements app on each machine:
+
+1. **Enable the rule**: Complex Modifications tab → Add rule → enable it.
+   Adding the file just makes it available as a predefined rule; it isn't
+   active until enabled here.
+2. **Grant "Modify events" for the device**: Devices tab → find the device
+   (e.g. NuPhy Air75 V3) → make sure event modification is turned on for it.
+   Without this, Karabiner sees the device but won't intercept its keys, and
+   rules scoped to it via `device_if` silently do nothing.
