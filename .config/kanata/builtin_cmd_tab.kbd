@@ -1,0 +1,21 @@
+(defcfg
+  macos-dev-names-include (
+    "Apple Internal Keyboard / Trackpad"
+  )
+  process-unmapped-keys yes
+)
+
+(defsrc
+  tab
+)
+
+(defalias
+  tab (switch
+        ((input real lmet)) XX break
+        () tab break
+      )
+)
+
+(deflayer base
+  @tab
+)

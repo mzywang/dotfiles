@@ -62,22 +62,45 @@ the file directly (no `yq` required).
 | `.config/nvim/` | Neovim config + `lazy-lock.json` plugin lockfile |
 | `.config/ghostty/config` | Ghostty terminal config |
 | `.config/cmux/cmux.json` | cmux config (JSONC) |
-| `.config/karabiner/assets/complex_modifications/nuphy_home_row_mods.json` | Karabiner-Elements home row mods, scoped to the NuPhy Air75 V3 keyboard |
-| `.config/karabiner/assets/complex_modifications/disable_command_tab.json` | Karabiner-Elements rule disabling Command-Tab |
+| `.config/kanata/nuphy.kbd` | kanata config: NuPhy Air75 V3 home row mods (Colemak firmware layout) + Cmd-Tab block |
+| `.config/kanata/builtin_cmd_tab.kbd` | kanata config: Cmd-Tab block on the built-in keyboard |
+| `launchd/*.plist` | LaunchDaemon templates for kanata + its VirtualHIDDevice daemon (installed by `kanata_setup.sh`, not symlinked) |
 | `packages.yaml` | Homebrew taps / formulae / casks |
 | `bootstrap.sh` | Installs software from `packages.yaml` |
 | `install.sh` | Symlinks configs into `$HOME` |
+| `kanata_setup.sh` | One-time sudo setup: VirtualHIDDevice driver + LaunchDaemons for kanata |
 
-### Karabiner-Elements rules
+### Kanata (NuPhy home row mods + Cmd-Tab block)
 
-`install.sh` only symlinks the rule files into
-`~/.config/karabiner/assets/complex_modifications/` — two manual steps are
-still needed in the Karabiner-Elements app on each machine:
+Home row mods (`a r s t` → left Cmd/Opt/Ctrl/Shift, `n e i o` → right
+Shift/Ctrl/Opt/Cmd, matching the Colemak firmware layout on the NuPhy) run
+through [kanata](https://github.com/jtroo/kanata) rather than
+Karabiner-Elements — its `tap-hold-tap-keys` action can whitelist specific
+"safe interrupt" keys per mod-tap key, which fixes fast same-hand rolls
+(e.g. alternating `s`/`t`) misfiring as modifiers, something Karabiner's
+elapsed-time-only model can't do. `.config/kanata/nuphy.kbd` is scoped to the
+NuPhy by device name (covers cable, Bluetooth, and 2.4GHz dongle modes) and
+also blocks Cmd-Tab; `.config/kanata/builtin_cmd_tab.kbd` is a second,
+separate kanata instance scoped only to the built-in keyboard that blocks
+Cmd-Tab there too, without touching anything else on it.
 
-1. **Enable the rule**: Complex Modifications tab → Add rule → enable it.
-   Adding the file just makes it available as a predefined rule; it isn't
-   active until enabled here.
-2. **Grant "Modify events" for the device**: Devices tab → find the device
-   (e.g. NuPhy Air75 V3) → make sure event modification is turned on for it.
-   Without this, Karabiner sees the device but won't intercept its keys, and
-   rules scoped to it via `device_if` silently do nothing.
+Setup on a new machine, in order:
+
+1. `bootstrap.sh` installs kanata via Homebrew.
+2. `install.sh` symlinks the two `.kbd` configs into `~/.config/kanata/`.
+3. Run `./kanata_setup.sh` once (needs sudo) — it installs the
+   Karabiner-DriverKit-VirtualHIDDevice driver kanata uses for macOS key
+   output, and registers kanata plus its daemon as LaunchDaemons so they
+   start at boot and restart if they ever crash.
+4. Grant two permissions manually in System Settings → Privacy & Security
+   (macOS doesn't allow scripting these): add
+   `/opt/homebrew/opt/kanata/bin/kanata` under both **Input Monitoring** and
+   **Accessibility**, then restart the daemons:
+   ```sh
+   sudo launchctl kickstart -k system/local.kanata.nuphy
+   sudo launchctl kickstart -k system/local.kanata.builtin-cmd-tab
+   ```
+
+Karabiner-Elements is not used at all in this setup and should not be
+installed alongside it — it ships a conflicting version of the same
+VirtualHIDDevice driver kanata depends on.

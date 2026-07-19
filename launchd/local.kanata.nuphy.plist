@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>local.kanata.nuphy</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/opt/kanata/bin/kanata</string>
+        <string>--cfg</string>
+        <string>__HOME__/.config/kanata/nuphy.kbd</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Library/Logs/local.kanata.nuphy.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Library/Logs/local.kanata.nuphy.log</string>
+</dict>
+</plist>
