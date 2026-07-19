@@ -1,0 +1,21 @@
+[user]
+	email = 44713145+mzywang@users.noreply.github.com
+	nae = Michael Wang
+	name = Michael Wang
+[push]
+	autoSetupRemote = true
+[core]
+	pager = delta
+[interactive]
+	diffFilter = delta --color-only
+[delta]
+	navigate = true
+  line-numbers = true
+  side-by-side = true
+[merge]
+	conflictStyle = zdiff3
+[filter "lfs"]
+	process = git-lfs filter-process
+	required = true
+	clean = git-lfs clean -- %f
+	smudge = git-lfs smudge -- %f
