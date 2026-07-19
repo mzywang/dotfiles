@@ -14,10 +14,10 @@ BACKUP_DIR="$HOME/.dotfiles-backup/$(date +%Y%m%d-%H%M%S)"
 
 # Repo files that should NOT be linked into $HOME.
 EXCLUDES=(
-  "install.sh" "bootstrap.sh" "kanata_setup.sh" "packages.yaml" "README.md" ".gitignore"
+  "install.sh" "bootstrap.sh" "kanata_setup.sh" "install_builtin_watcher.sh" "packages.yaml" "README.md" ".gitignore"
   "launchd/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist"
   "launchd/local.kanata.nuphy.plist"
-  "launchd/local.kanata.builtin-cmd-tab.plist"
+  "launchd/local.kanata.builtin-watcher.plist"
 )
 
 is_excluded() {
