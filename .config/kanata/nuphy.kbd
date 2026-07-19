@@ -1,0 +1,40 @@
+(defcfg
+  macos-dev-names-include (
+    "Air75 V3"
+    "Air75 V3-1"
+    "Air75 V3 Dongle"
+  )
+  process-unmapped-keys yes
+)
+
+(defsrc
+  a r s t
+  n e i o
+  g tab
+)
+
+(defvar
+  tap-time 200
+  hold-time 200
+)
+
+(defalias
+  a (tap-hold-tap-keys $tap-time $hold-time a lmet (r s t n e i o))
+  r (tap-hold-tap-keys $tap-time $hold-time r lalt (a s t n e i o))
+  s (tap-hold-tap-keys $tap-time $hold-time s lctl (a r t n e i o))
+  t (tap-hold-tap-keys $tap-time $hold-time t lsft (a r s n e i o))
+  n (tap-hold-tap-keys $tap-time $hold-time n rsft (a r s t e i o g))
+  e (tap-hold-tap-keys $tap-time $hold-time e rctl (a r s t n i o))
+  i (tap-hold-tap-keys $tap-time $hold-time i ralt (a r s t n e o))
+  o (tap-hold-tap-keys $tap-time $hold-time o rmet (a r s t n e i))
+  tab (switch
+        ((input real lmet)) XX break
+        () tab break
+      )
+)
+
+(deflayer base
+  @a @r @s @t
+  @n @e @i @o
+  g @tab
+)
