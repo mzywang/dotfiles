@@ -1,10 +1,11 @@
 #!/usr/bin/env bash
 #
 # One-time system-level setup for kanata (NuPhy Air75 V3 home row mods +
-# Cmd-Tab blocking on both the NuPhy and the built-in keyboard). Installs the
-# Karabiner-DriverKit-VirtualHIDDevice driver kanata depends on for macOS key
-# output, and registers kanata + its daemon as LaunchDaemons so they start at
-# boot. Requires sudo.
+# Cmd-Tab blocking on the NuPhy, plus a watcher that blocks the built-in
+# keyboard entirely whenever the NuPhy is connected and just blocks Cmd-Tab
+# on it otherwise). Installs the Karabiner-DriverKit-VirtualHIDDevice driver
+# kanata depends on for macOS key output, and registers kanata + its daemons
+# as LaunchDaemons so they start at boot. Requires sudo.
 #
 # Run this after bootstrap.sh (installs kanata via Homebrew) and install.sh
 # (symlinks the .kbd configs into ~/.config/kanata/).
@@ -45,21 +46,21 @@ sudo "$MANAGER" activate
 echo "==> Installing LaunchDaemons"
 sudo cp "$DOTFILES_DIR/launchd/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist" /Library/LaunchDaemons/
 sed "s#__HOME__#$HOME#g" "$DOTFILES_DIR/launchd/local.kanata.nuphy.plist" | sudo tee /Library/LaunchDaemons/local.kanata.nuphy.plist > /dev/null
-sed "s#__HOME__#$HOME#g" "$DOTFILES_DIR/launchd/local.kanata.builtin-cmd-tab.plist" | sudo tee /Library/LaunchDaemons/local.kanata.builtin-cmd-tab.plist > /dev/null
+sed "s#__HOME__#$HOME#g" "$DOTFILES_DIR/launchd/local.kanata.builtin-watcher.plist" | sudo tee /Library/LaunchDaemons/local.kanata.builtin-watcher.plist > /dev/null
 
 sudo chown root:wheel \
   /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist \
   /Library/LaunchDaemons/local.kanata.nuphy.plist \
-  /Library/LaunchDaemons/local.kanata.builtin-cmd-tab.plist
+  /Library/LaunchDaemons/local.kanata.builtin-watcher.plist
 sudo chmod 644 \
   /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist \
   /Library/LaunchDaemons/local.kanata.nuphy.plist \
-  /Library/LaunchDaemons/local.kanata.builtin-cmd-tab.plist
+  /Library/LaunchDaemons/local.kanata.builtin-watcher.plist
 
 sudo launchctl bootstrap system /Library/LaunchDaemons/org.pqrs.Karabiner-VirtualHIDDevice-Daemon.plist
 sleep 2
 sudo launchctl bootstrap system /Library/LaunchDaemons/local.kanata.nuphy.plist
-sudo launchctl bootstrap system /Library/LaunchDaemons/local.kanata.builtin-cmd-tab.plist
+sudo launchctl bootstrap system /Library/LaunchDaemons/local.kanata.builtin-watcher.plist
 
 cat <<'EOF'
 
@@ -74,7 +75,7 @@ cat <<'EOF'
 
     After granting both, restart the kanata daemons so they pick it up:
       sudo launchctl kickstart -k system/local.kanata.nuphy
-      sudo launchctl kickstart -k system/local.kanata.builtin-cmd-tab
+      sudo launchctl kickstart -k system/local.kanata.builtin-watcher
 
     Check status any time with:
       sudo launchctl list | grep -E "pqrs|kanata"

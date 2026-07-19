@@ -3,20 +3,18 @@
 <plist version="1.0">
 <dict>
     <key>Label</key>
-    <string>local.kanata.builtin-cmd-tab</string>
+    <string>local.kanata.builtin-watcher</string>
     <key>ProgramArguments</key>
     <array>
-        <string>/opt/homebrew/opt/kanata/bin/kanata</string>
-        <string>--cfg</string>
-        <string>__HOME__/.config/kanata/builtin_cmd_tab.kbd</string>
+        <string>__HOME__/.config/kanata/nuphy_builtin_keyboard_watcher.sh</string>
     </array>
     <key>RunAtLoad</key>
     <true/>
     <key>KeepAlive</key>
     <true/>
     <key>StandardOutPath</key>
-    <string>/Library/Logs/local.kanata.builtin-cmd-tab.log</string>
+    <string>/Library/Logs/local.kanata.builtin-watcher.log</string>
     <key>StandardErrorPath</key>
-    <string>/Library/Logs/local.kanata.builtin-cmd-tab.log</string>
+    <string>/Library/Logs/local.kanata.builtin-watcher.log</string>
 </dict>
 </plist>

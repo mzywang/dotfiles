@@ -65,14 +65,17 @@ the file directly (no `yq` required).
 | `.config/zed/settings.json` | Zed editor settings |
 | `.config/cmux/cmux.json` | cmux config (JSONC) |
 | `.config/kanata/nuphy.kbd` | kanata config: NuPhy Air75 V3 home row mods (Colemak firmware layout) + Cmd-Tab block |
-| `.config/kanata/builtin_cmd_tab.kbd` | kanata config: Cmd-Tab block on the built-in keyboard |
+| `.config/kanata/builtin_cmd_tab.kbd` | kanata config: Cmd-Tab block on the built-in keyboard (used when the NuPhy is disconnected) |
+| `.config/kanata/builtin_block.kbd` | kanata config: blocks every key on the built-in keyboard (used when the NuPhy is connected) |
+| `.config/kanata/nuphy_builtin_keyboard_watcher.sh` | polls for the NuPhy and switches the built-in keyboard's kanata instance between the two configs above |
 | `launchd/*.plist` | LaunchDaemon templates for kanata + its VirtualHIDDevice daemon (installed by `kanata_setup.sh`, not symlinked) |
 | `packages.yaml` | Homebrew taps / formulae / casks |
 | `bootstrap.sh` | Installs software from `packages.yaml` |
 | `install.sh` | Symlinks configs into `$HOME` |
 | `kanata_setup.sh` | One-time sudo setup: VirtualHIDDevice driver + LaunchDaemons for kanata |
+| `install_builtin_watcher.sh` | Installs/reloads just the `local.kanata.builtin-watcher` daemon; re-run any time after editing the watcher plist or script (aliased as `builtin-watcher-install`) |
 
-### Kanata (NuPhy home row mods + Cmd-Tab block)
+### Kanata (NuPhy home row mods + Cmd-Tab block + built-in keyboard disable)
 
 Home row mods (`a r s t` → left Cmd/Opt/Ctrl/Shift, `n e i o` → right
 Shift/Ctrl/Opt/Cmd, matching the Colemak firmware layout on the NuPhy) run
@@ -82,25 +85,40 @@ Karabiner-Elements — its `tap-hold-tap-keys` action can whitelist specific
 (e.g. alternating `s`/`t`) misfiring as modifiers, something Karabiner's
 elapsed-time-only model can't do. `.config/kanata/nuphy.kbd` is scoped to the
 NuPhy by device name (covers cable, Bluetooth, and 2.4GHz dongle modes) and
-also blocks Cmd-Tab; `.config/kanata/builtin_cmd_tab.kbd` is a second,
-separate kanata instance scoped only to the built-in keyboard that blocks
-Cmd-Tab there too, without touching anything else on it.
+also blocks Cmd-Tab.
+
+The built-in keyboard is owned by a second, separate kanata instance, but
+unlike the NuPhy it can't just run one static config, since we want it to
+behave differently depending on whether the NuPhy is around: normally it
+should just block Cmd-Tab, but while the NuPhy is connected it should be
+fully disabled (replicating Karabiner-Elements' old "disable built-in
+keyboard while external keyboard is connected" toggle, so the laptop's own
+keys can't double-type alongside the NuPhy). Kanata has no built-in notion of
+"device A present → block device B", and macOS device-list config
+(`macos-dev-names-include`) isn't live-reloadable anyway, so
+`.config/kanata/nuphy_builtin_keyboard_watcher.sh` polls `kanata --list`
+every few seconds for the NuPhy and swaps which config owns the built-in
+keyboard: `builtin_block.kbd` (blocks every key) while it's connected,
+`builtin_cmd_tab.kbd` (just blocks Cmd-Tab) while it's not. Only one process
+can hold the device at a time, so the watcher always stops the previous one
+before starting the other.
 
 Setup on a new machine, in order:
 
 1. `bootstrap.sh` installs kanata via Homebrew.
-2. `install.sh` symlinks the two `.kbd` configs into `~/.config/kanata/`.
+2. `install.sh` symlinks the `.kbd` configs and the watcher script into
+   `~/.config/kanata/`.
 3. Run `./kanata_setup.sh` once (needs sudo) — it installs the
    Karabiner-DriverKit-VirtualHIDDevice driver kanata uses for macOS key
-   output, and registers kanata plus its daemon as LaunchDaemons so they
-   start at boot and restart if they ever crash.
+   output, and registers kanata (NuPhy) plus the built-in-keyboard watcher as
+   LaunchDaemons so they start at boot and restart if they ever crash.
 4. Grant two permissions manually in System Settings → Privacy & Security
    (macOS doesn't allow scripting these): add
    `/opt/homebrew/opt/kanata/bin/kanata` under both **Input Monitoring** and
    **Accessibility**, then restart the daemons:
    ```sh
    sudo launchctl kickstart -k system/local.kanata.nuphy
-   sudo launchctl kickstart -k system/local.kanata.builtin-cmd-tab
+   sudo launchctl kickstart -k system/local.kanata.builtin-watcher
    ```
 
 Karabiner-Elements is not used at all in this setup and should not be
