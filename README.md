@@ -1,6 +1,6 @@
 # dotfiles
 
-Personal macOS dotfiles: zsh + Powerlevel10k, Neovim, Vim, Ghostty, and cmux.
+Personal macOS dotfiles: zsh + Powerlevel10k, Neovim, Vim, Ghostty, Zed, git, and cmux.
 
 ## Set up a new machine
 
@@ -21,8 +21,8 @@ zsh-autosuggestions, and cmux. Safe to re-run; `brew install` is idempotent.
 ### 2. `install.sh` — link configs
 
 Symlinks each tracked dotfile into `$HOME` at its matching path
-(`.zshrc`, `.p10k.zsh`, `.vimrc`, `.config/nvim/*`, `.config/ghostty/config`,
-`.config/cmux/cmux.json`).
+(`.zshrc`, `.p10k.zsh`, `.vimrc`, `.gitconfig`, `.config/nvim/*`,
+`.config/ghostty/config`, `.config/zed/settings.json`, `.config/cmux/cmux.json`).
 Anything already at those paths is backed up to `~/.dotfiles-backup/<timestamp>/`
 first. Also seeds `~/.zshrc.local` (see Secrets below). Safe to re-run.
 
@@ -59,8 +59,10 @@ the file directly (no `yq` required).
 | `.zshrc` | zsh config (Powerlevel10k, autosuggestions, PATH, aliases) |
 | `.p10k.zsh` | Powerlevel10k prompt config |
 | `.vimrc` | Vim config |
+| `.gitconfig` | git config (identity, delta pager, zdiff3 conflict style) |
 | `.config/nvim/` | Neovim config + `lazy-lock.json` plugin lockfile |
 | `.config/ghostty/config` | Ghostty terminal config |
+| `.config/zed/settings.json` | Zed editor settings |
 | `.config/cmux/cmux.json` | cmux config (JSONC) |
 | `.config/karabiner/assets/complex_modifications/nuphy_home_row_mods.json` | Karabiner-Elements home row mods, scoped to the NuPhy Air75 V3 keyboard |
 | `.config/karabiner/assets/complex_modifications/disable_command_tab.json` | Karabiner-Elements rule disabling Command-Tab |
