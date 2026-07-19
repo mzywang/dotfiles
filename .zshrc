@@ -35,7 +35,15 @@ export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
 # scrollback is preserved. The count must match the prompt height: 2 prompt
 # lines + 1 for POWERLEVEL9K_PROMPT_ADD_NEWLINE. Bump it if you change either.
 autoload -Uz add-zsh-hook
+# Skip the first firing: it lands during P10k's instant-prompt output-capture
+# window, and the raw printf/tput output trips its "console output detected"
+# warning on every new tab.
+typeset -g _reserve_bottom_line_first=1
 _reserve_bottom_line() {
+  if (( _reserve_bottom_line_first )); then
+    _reserve_bottom_line_first=0
+    return
+  fi
   local reserve=4
   printf '\n%.0s' {1..$reserve}
   tput cuu $reserve
