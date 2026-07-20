@@ -6,7 +6,7 @@
 )
 
 (defsrc
-  tab
+  tab caps
 )
 
 (defalias
@@ -17,5 +17,5 @@
 )
 
 (deflayer base
-  @tab
+  @tab esc
 )
