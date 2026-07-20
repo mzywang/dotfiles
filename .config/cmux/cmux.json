@@ -177,11 +177,11 @@
   //     "interceptTerminalOpenCommandInCmuxBrowser" : true
   //   },
 
-  //   "markdown" : {
-  //     "fontSize" : 15,
-  //     "fontFamily" : "",
-  //     "maxWidth" : 980
-  //   },
+  "markdown" : {
+    "fontSize" : 15,
+    "fontFamily" : "Avenir Next",
+    "maxWidth" : 980
+  },
 
   //   "fileEditor" : {
   //     "wordWrap" : false
