@@ -1,1 +1,7 @@
 font-size = 14
+
+# Semi-transparent terminal background (cmux uses Ghostty config).
+# Passthrough shader is required for cmux to apply opacity to terminal panes.
+background-opacity = 0.85
+background-blur = 20
+custom-shader = ~/.config/ghostty/passthrough.glsl
