@@ -26,4 +26,10 @@ command! CopyRelPath let @+ = expand('%')
 inoremap <expr> ,,d '# ' .. strftime('%Y%m%d')
 
 " eng_log: time entry ( - HHMM: )
-inoremap <expr> ,,t ' - ' .. strftime('%H%M') .. ': '
+function! EngLogTime() abort
+  let lnum = line('.')
+  call setline(lnum, ' - ' .. strftime('%H%M') .. ': ')
+  call cursor(lnum, col('$'))
+  startinsert!
+endfunction
+inoremap ,,t <Esc>:call EngLogTime()<CR>
