@@ -28,6 +28,31 @@ vim.api.nvim_create_user_command("CopyPwd", function()
   print("copied cwd")
 end, {})
 
+local eng_log_autosave = vim.api.nvim_create_augroup("EngLogAutoSave", { clear = true })
+
+local function save_eng_log_if_modified()
+  local name = vim.fn.fnamemodify(vim.api.nvim_buf_get_name(0), ":t")
+  if name == "eng_log.txt" and vim.bo.modified then
+    pcall(vim.cmd, "silent! write")
+  end
+end
+
+vim.api.nvim_create_autocmd("BufLeave", {
+  group = eng_log_autosave,
+  pattern = "eng_log.txt",
+  callback = function()
+    if vim.bo.modified then
+      pcall(vim.cmd, "silent! write")
+    end
+  end,
+})
+
+vim.api.nvim_create_autocmd("FocusLost", {
+  group = eng_log_autosave,
+  pattern = "*",
+  callback = save_eng_log_if_modified,
+})
+
 require("lazy").setup({
   {
     "lewis6991/gitsigns.nvim",

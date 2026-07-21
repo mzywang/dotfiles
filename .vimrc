@@ -33,3 +33,8 @@ function! EngLogTime() abort
   startinsert!
 endfunction
 inoremap ,,t <Esc>:call EngLogTime()<CR>
+
+augroup EngLogAutoSave
+  autocmd!
+  autocmd BufLeave eng_log.txt if &modified | silent! write | endif
+augroup END
