@@ -11,6 +11,12 @@ if not (vim.uv or vim.loop).fs_stat(lazypath) then
 end
 vim.opt.rtp:prepend(lazypath)
 
+vim.opt.expandtab = true
+vim.opt.shiftwidth = 4
+vim.opt.tabstop = 4
+vim.opt.softtabstop = 4
+vim.opt.autoindent = true
+vim.opt.smartindent = true
 vim.opt.number = true
 vim.opt.relativenumber = true
 vim.opt.termguicolors = true
@@ -27,6 +33,20 @@ vim.api.nvim_create_user_command("CopyPwd", function()
   vim.fn.setreg("+", vim.fn.getcwd())
   print("copied cwd")
 end, {})
+
+vim.keymap.set("i", ",,d", function()
+  return "# " .. os.date("%Y%m%d")
+end, { expr = true })
+
+local function eng_log_time()
+  local lnum = vim.api.nvim_win_get_cursor(0)[1]
+  local line = " - " .. os.date("%H%M") .. ": "
+  vim.api.nvim_buf_set_lines(0, lnum - 1, lnum, false, { line })
+  vim.api.nvim_win_set_cursor(0, { lnum, #line })
+  vim.cmd.startinsert()
+end
+
+vim.keymap.set("i", ",,t", eng_log_time)
 
 local eng_log_autosave = vim.api.nvim_create_augroup("EngLogAutoSave", { clear = true })
 
