@@ -21,3 +21,9 @@ set number
 set relativenumber
 
 command! CopyRelPath let @+ = expand('%')
+
+" eng_log: date header (# YYYYMMDD)
+inoremap <expr> ,,d '# ' .. strftime('%Y%m%d')
+
+" eng_log: time entry ( - HHMM: )
+inoremap <expr> ,,t ' - ' .. strftime('%H%M') .. ': '
