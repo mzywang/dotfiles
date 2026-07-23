@@ -65,6 +65,7 @@ the file directly (no `yq` required).
 | `.config/zed/settings.json` | Zed editor settings |
 | `.config/cmux/cmux.json` | cmux config (JSONC) |
 | `.config/kanata/nuphy.kbd` | kanata config: NuPhy Air75 V3 home row mods (Colemak firmware layout) + Cmd-Tab block |
+| `.config/kanata/nuphy_kanata_runner.sh` | waits for the NuPhy to appear, then runs `nuphy.kbd`; used by the `local.kanata.nuphy` LaunchDaemon so boot doesn't race the dongle |
 | `.config/kanata/builtin_cmd_tab.kbd` | kanata config: Cmd-Tab block on the built-in keyboard (used when the NuPhy is disconnected) |
 | `.config/kanata/builtin_block.kbd` | kanata config: blocks every key on the built-in keyboard (used when the NuPhy is connected) |
 | `.config/kanata/nuphy_builtin_keyboard_watcher.sh` | polls for the NuPhy and switches the built-in keyboard's kanata instance between the two configs above |
@@ -74,6 +75,7 @@ the file directly (no `yq` required).
 | `install.sh` | Symlinks configs into `$HOME` |
 | `kanata_setup.sh` | One-time sudo setup: VirtualHIDDevice driver + LaunchDaemons for kanata |
 | `install_builtin_watcher.sh` | Installs/reloads just the `local.kanata.builtin-watcher` daemon; re-run any time after editing the watcher plist or script (aliased as `builtin-watcher-install`) |
+| `install_nuphy_runner.sh` | Installs/reloads just the `local.kanata.nuphy` daemon; re-run any time after editing the runner plist or script (aliased as `nuphy-install`) |
 
 ### Kanata (NuPhy home row mods + Cmd-Tab block + built-in keyboard disable)
 
@@ -85,7 +87,10 @@ Karabiner-Elements — its `tap-hold-tap-keys` action can whitelist specific
 (e.g. alternating `s`/`t`) misfiring as modifiers, something Karabiner's
 elapsed-time-only model can't do. `.config/kanata/nuphy.kbd` is scoped to the
 NuPhy by device name (covers cable, Bluetooth, and 2.4GHz dongle modes) and
-also blocks Cmd-Tab.
+also blocks Cmd-Tab. Because the dongle can take a while to enumerate after
+login, `nuphy_kanata_runner.sh` polls for the NuPhy before starting kanata
+instead of launching it directly at boot (which used to fail repeatedly until
+the device appeared).
 
 The built-in keyboard is owned by a second, separate kanata instance, but
 unlike the NuPhy it can't just run one static config, since we want it to
