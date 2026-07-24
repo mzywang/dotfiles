@@ -76,6 +76,7 @@ the file directly (no `yq` required).
 | `kanata_setup.sh` | One-time sudo setup: VirtualHIDDevice driver + LaunchDaemons for kanata |
 | `install_builtin_watcher.sh` | Installs/reloads just the `local.kanata.builtin-watcher` daemon; re-run any time after editing the watcher plist or script (aliased as `builtin-watcher-install`) |
 | `install_nuphy_runner.sh` | Installs/reloads just the `local.kanata.nuphy` daemon; re-run any time after editing the runner plist or script (aliased as `nuphy-install`) |
+| `install_unlock_watcher.sh` | Installs the screen-unlock LaunchAgent + sudoers drop-in so kanata restarts after lock/unlock (aliased as `kanata-unlock-install`) |
 
 ### Kanata (NuPhy home row mods + Cmd-Tab block + built-in keyboard disable)
 
@@ -90,7 +91,10 @@ NuPhy by device name (covers cable, Bluetooth, and 2.4GHz dongle modes) and
 also blocks Cmd-Tab. Because the dongle can take a while to enumerate after
 login, `nuphy_kanata_runner.sh` polls for the NuPhy before starting kanata
 instead of launching it directly at boot (which used to fail repeatedly until
-the device appeared).
+the device appeared). After sleep/wake or screen lock/unlock, kanata can wedge
+in the DriverKit virtual-HID recovery loop; the runner's watchdog kills and
+restarts it, and `kanata_unlock_watcher.sh` (a user LaunchAgent) kickstarts
+the daemons on screen unlock.
 
 The built-in keyboard is owned by a second, separate kanata instance, but
 unlike the NuPhy it can't just run one static config, since we want it to
@@ -125,6 +129,9 @@ Setup on a new machine, in order:
    sudo launchctl kickstart -k system/local.kanata.nuphy
    sudo launchctl kickstart -k system/local.kanata.builtin-watcher
    ```
+5. Run `./install_unlock_watcher.sh` so kanata restarts automatically after
+   screen unlock (installs a LaunchAgent and a sudoers drop-in for passwordless
+   `launchctl kickstart`).
 
 Karabiner-Elements is not used at all in this setup and should not be
 installed alongside it — it ships a conflicting version of the same

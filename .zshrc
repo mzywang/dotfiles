@@ -27,6 +27,7 @@ alias k=kubectl
 alias pcs="peach commit status"
 alias nuphy-restart="sudo launchctl kickstart -k system/local.kanata.nuphy"
 alias nuphy-install="/Users/michael/mzywang/dotfiles/install_nuphy_runner.sh"
+alias kanata-unlock-install="/Users/michael/mzywang/dotfiles/install_unlock_watcher.sh"
 alias builtin-watcher-install="/Users/michael/mzywang/dotfiles/install_builtin_watcher.sh"
 export PATH="$HOME/.local/bin:$PATH"
 export PATH="/opt/homebrew/opt/mysql-client/bin:$PATH"
