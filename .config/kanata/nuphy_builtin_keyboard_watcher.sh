@@ -35,7 +35,7 @@ stop_all() {
 }
 
 while true; do
-  if ioreg -c IOHIDDevice -r -l 2>/dev/null | grep -q "Air75 V3"; then
+  if ioreg -c IOHIDDevice -r -l 2>/dev/null | grep "Air75 V3" > /dev/null; then
     desired_cfg="$BLOCK_CFG"
   else
     desired_cfg="$CMD_TAB_CFG"
