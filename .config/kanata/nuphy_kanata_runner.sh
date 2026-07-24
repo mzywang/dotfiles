@@ -14,7 +14,7 @@ KANATA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NUPHY_CFG="$KANATA_DIR/nuphy.kbd"
 
 nuphy_present() {
-  ioreg -c IOHIDDevice -r -l 2>/dev/null | grep -q "Air75 V3"
+  ioreg -c IOHIDDevice -r -l 2>/dev/null | grep "Air75 V3" > /dev/null
 }
 
 wait_for_nuphy() {
