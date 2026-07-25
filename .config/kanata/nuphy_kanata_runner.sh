@@ -1,9 +1,8 @@
 #!/usr/bin/env bash
 #
 # Waits for the NuPhy Air75 V3 to appear (cable, Bluetooth, or 2.4GHz dongle),
-# then runs kanata with nuphy.kbd in the background. A watchdog restarts kanata
-# when it exits, wedges in the DriverKit virtual-HID wait loop, after a system
-# wake, or when the NuPhy disconnects and reconnects.
+# then runs kanata with nuphy.kbd. Restarts when kanata exits, the NuPhy
+# disconnects, kanata wedges in the DriverKit virtual-HID loop, or after wake.
 #
 # Runs as a root LaunchDaemon (see launchd/local.kanata.nuphy.plist).
 # $HOME isn't reliably set -- locate configs relative to this script's path.
@@ -23,6 +22,10 @@ MIN_RUN_BEFORE_STUCK_CHECK=15
 
 nuphy_present() {
   ioreg -c IOHIDDevice -r -l 2>/dev/null | grep -q "Air75 V3"
+}
+
+kanata_running() {
+  pgrep -f -- "--cfg $NUPHY_CFG" > /dev/null
 }
 
 wait_for_nuphy() {
@@ -60,10 +63,6 @@ stuck_in_virtual_hid_since() {
   [[ "$non_vhid" -eq 0 ]]
 }
 
-get_wake_time() {
-  sysctl -n kern.waketime 2>/dev/null || true
-}
-
 ensure_vhid_daemon() {
   launchctl kickstart -k "$VHID_DAEMON" 2>/dev/null || true
   sleep 2
@@ -74,64 +73,73 @@ stop_kanata() {
   sleep 1
 }
 
-start_kanata() {
-  "$KANATA" --cfg "$NUPHY_CFG" &
+start_disconnect_monitor() {
+  (
+    while nuphy_present; do
+      sleep 2
+    done
+    stop_kanata
+  ) &
   echo $!
 }
 
-last_wake="$(get_wake_time)"
+start_stuck_watchdog() {
+  local log_offset="$1"
+  (
+    local started=$SECONDS
+    local recovered_vhid=0
+
+    while kanata_running; do
+      if grabbed_since "$log_offset"; then
+        sleep "$POLL_INTERVAL"
+        continue
+      fi
+
+      if (( SECONDS - started > GRAB_TIMEOUT )); then
+        if (( recovered_vhid == 0 )); then
+          ensure_vhid_daemon
+          recovered_vhid=1
+          log_offset="$(log_line_count)"
+          started=$SECONDS
+          stop_kanata
+          exit 0
+        fi
+        stop_kanata
+        exit 0
+      fi
+
+      if (( SECONDS - started > MIN_RUN_BEFORE_STUCK_CHECK )) \
+        && stuck_in_virtual_hid_since "$log_offset"; then
+        if (( recovered_vhid == 0 )); then
+          ensure_vhid_daemon
+          recovered_vhid=1
+          log_offset="$(log_line_count)"
+          started=$SECONDS
+          stop_kanata
+          exit 0
+        fi
+        stop_kanata
+        exit 0
+      fi
+
+      sleep "$POLL_INTERVAL"
+    done
+  ) &
+  echo $!
+}
 
 while true; do
   wait_for_nuphy
   stop_kanata
 
   log_offset="$(log_line_count)"
-  kanata_pid="$(start_kanata)"
-  started_at=$SECONDS
-  recovered_vhid=0
+  disconnect_mon="$(start_disconnect_monitor)"
+  stuck_mon="$(start_stuck_watchdog "$log_offset")"
 
-  while nuphy_present && kill -0 "$kanata_pid" 2>/dev/null; do
-    current_wake="$(get_wake_time)"
-    if [[ -n "$last_wake" && -n "$current_wake" && "$current_wake" != "$last_wake" ]]; then
-      break
-    fi
-    last_wake="$current_wake"
+  "$KANATA" --cfg "$NUPHY_CFG"
 
-    if grabbed_since "$log_offset"; then
-      sleep "$POLL_INTERVAL"
-      continue
-    fi
-
-    if (( SECONDS - started_at > GRAB_TIMEOUT )); then
-      if (( recovered_vhid == 0 )); then
-        ensure_vhid_daemon
-        recovered_vhid=1
-        log_offset="$(log_line_count)"
-        stop_kanata
-        kanata_pid="$(start_kanata)"
-        started_at=$SECONDS
-        continue
-      fi
-      break
-    fi
-
-    if (( SECONDS - started_at > MIN_RUN_BEFORE_STUCK_CHECK )) \
-      && stuck_in_virtual_hid_since "$log_offset"; then
-      if (( recovered_vhid == 0 )); then
-        ensure_vhid_daemon
-        recovered_vhid=1
-        log_offset="$(log_line_count)"
-        stop_kanata
-        kanata_pid="$(start_kanata)"
-        started_at=$SECONDS
-        continue
-      fi
-      break
-    fi
-
-    sleep "$POLL_INTERVAL"
-  done
-
+  kill "$disconnect_mon" "$stuck_mon" 2>/dev/null || true
+  wait "$disconnect_mon" "$stuck_mon" 2>/dev/null || true
   stop_kanata
   sleep 2
 done
