@@ -1,2 +1,5 @@
 # Machine-specific secrets, never commit
 .zshrc.local
+
+# Kanata built-in keyboard layer preference (qwerty/colemak)
+.config/kanata/builtin_layer

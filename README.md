@@ -66,7 +66,8 @@ the file directly (no `yq` required).
 | `.config/cmux/cmux.json` | cmux config (JSONC) |
 | `.config/kanata/nuphy.kbd` | kanata config: NuPhy Air75 V3 home row mods (Colemak firmware layout) + Cmd-Tab block |
 | `.config/kanata/nuphy_kanata_runner.sh` | waits for the NuPhy to appear, then runs `nuphy.kbd`; used by the `local.kanata.nuphy` LaunchDaemon so boot doesn't race the dongle |
-| `.config/kanata/builtin_cmd_tab.kbd` | kanata config: Cmd-Tab block on the built-in keyboard (used when the NuPhy is disconnected) |
+| `.config/kanata/builtin_cmd_tab.kbd` | kanata config for the built-in keyboard when the NuPhy is disconnected: Cmd-Tab block, caps→esc, and a toggleable Colemak-DH layer (keep macOS on U.S. QWERTY) |
+| `.config/kanata/toggle_builtin_colemak.sh` | toggles the built-in keyboard between QWERTY and Colemak via kanata's TCP server (`builtin-colemak-toggle` alias) |
 | `.config/kanata/builtin_block.kbd` | kanata config: blocks every key on the built-in keyboard (used when the NuPhy is connected) |
 | `.config/kanata/nuphy_builtin_keyboard_watcher.sh` | polls for the NuPhy and switches the built-in keyboard's kanata instance between the two configs above |
 | `launchd/*.plist` | LaunchDaemon templates for kanata + its VirtualHIDDevice daemon (installed by `kanata_setup.sh`, not symlinked) |
@@ -104,9 +105,22 @@ keys can't double-type alongside the NuPhy). Kanata has no built-in notion of
 `.config/kanata/nuphy_builtin_keyboard_watcher.sh` polls `kanata --list`
 every few seconds for the NuPhy and swaps which config owns the built-in
 keyboard: `builtin_block.kbd` (blocks every key) while it's connected,
-`builtin_cmd_tab.kbd` (just blocks Cmd-Tab) while it's not. Only one process
+`builtin_cmd_tab.kbd` (Cmd-Tab block, caps→esc, optional Colemak layer) while it's not. Only one process
 can hold the device at a time, so the watcher always stops the previous one
 before starting the other.
+
+The built-in Colemak layer is Colemak-DH with `'` on the `p` key and `;` on the
+key right of `l` (matching the NuPhy firmware layout, not macOS's Colemak ANSI
+input source). Keep macOS on **U.S. QWERTY** and toggle with:
+
+```sh
+builtin-colemak-toggle
+```
+
+The watcher starts `builtin_cmd_tab.kbd` with a TCP server on port `7071` so
+the toggle script can switch layers without restarting kanata. The chosen layer
+is saved to `.config/kanata/builtin_layer` and restored automatically when the
+built-in kanata instance restarts (for example after plugging the NuPhy back in).
 
 Setup on a new machine, in order:
 
