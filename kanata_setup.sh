@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
-# One-time system-level setup for kanata (NuPhy Air75 V3 home row mods +
-# Cmd-Tab blocking on the NuPhy, plus a watcher that blocks the built-in
+# One-time system-level setup for kanata (Cmd-Tab blocking on the NuPhy,
+# plus a watcher that blocks the built-in
 # keyboard entirely whenever the NuPhy is connected and just blocks Cmd-Tab
 # on it otherwise). Installs the Karabiner-DriverKit-VirtualHIDDevice driver
 # kanata depends on for macOS key output, and registers kanata + its daemons
