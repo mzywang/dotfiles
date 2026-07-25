@@ -1,4 +1,5 @@
-;; Built-in Mac keyboard: Cmd-Tab block, caps->esc, optional Colemak-DH layer.
+;; Built-in Mac keyboard: Cmd-Tab block, caps->esc, optional Colemak-DH layer,
+;; and home row mods (matching nuphy.kbd) on both QWERTY and Colemak layers.
 ;; Keep macOS on U.S. QWERTY; toggle Colemak with toggle_builtin_colemak.sh.
 ;;
 ;; Colemak layout (apostrophe on p, semicolon on the key right of l):
@@ -23,18 +24,41 @@
   left down up   rght
 )
 
+(defvar
+  tap-time 200
+  hold-time 150
+)
+
 (defalias
   tab (switch
         ((input real lmet)) XX break
         () tab break
       )
+  ;; QWERTY layer: home row mods on physical QWERTY keys
+  qa (tap-hold-tap-keys $tap-time $hold-time a lmet (s d f j k l ;))
+  qs (tap-hold-tap-keys $tap-time $hold-time s lalt (a d f j k l ;))
+  qd (tap-hold-tap-keys $tap-time $hold-time d lctl (a s f j k l ;))
+  qf (tap-hold-tap-keys $tap-time $hold-time f lsft (a s d j k l ;))
+  qj (tap-hold-tap-keys $tap-time $hold-time j rsft (a s d f k l ;))
+  qk (tap-hold-tap-keys $tap-time $hold-time k rctl (a s d f j l ;))
+  ql (tap-hold-tap-keys $tap-time $hold-time l ralt (a s d f j k ;))
+  q; (tap-hold-tap-keys $tap-time $hold-time ; rmet (a s d f j k l))
+  ;; Colemak layer: same physical keys, Colemak tap outputs (matches nuphy.kbd)
+  ca (tap-hold-tap-keys $tap-time $hold-time a lmet (s d f j k l ;))
+  cr (tap-hold-tap-keys $tap-time $hold-time r lalt (a d f j k l ;))
+  cs (tap-hold-tap-keys $tap-time $hold-time s lctl (a f j k l ;))
+  ct (tap-hold-tap-keys $tap-time $hold-time t lsft (a s d j k l ;))
+  cn (tap-hold-tap-keys $tap-time $hold-time n rsft (a s d f k l ; g))
+  ce (tap-hold-tap-keys $tap-time $hold-time e rctl (a s d f j l ;))
+  ci (tap-hold-tap-keys $tap-time $hold-time i ralt (a s d f j k ;))
+  co (tap-hold-tap-keys $tap-time $hold-time o rmet (a s d f j k l))
 )
 
 (deflayer qwerty
   esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   @tab q    w    e    r    t    y    u    i    o    p    [    ]    \
-  esc  a    s    d    f    g    h    j    k    l    ;    '    ret
+  esc  @qa  @qs  @qd  @qf  g    h    @qj  @qk  @ql  @q;  '    ret
   lsft z    x    c    v    b    n    m    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
   left down up   rght
@@ -44,7 +68,7 @@
   esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
   grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
   @tab q    w    f    p    b    j    l    u    y    '    [    ]    \
-  esc  a    r    s    t    g    m    n    e    i    o    ;    ret
+  esc  @ca  @cr  @cs  @ct  g    m    @cn  @ce  @ci  @co  ;    ret
   lsft z    x    c    d    v    k    h    ,    .    /    rsft
   lctl lmet lalt           spc            ralt rmet rctl
   left down up   rght
