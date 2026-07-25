@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 #
-# Waits for the NuPhy Air75 V3 to appear (cable, Bluetooth, or 2.4GHz dongle),
-# then runs kanata with nuphy.kbd. Restarts if kanata exits (e.g. keyboard
-# unplugged) after waiting for the device to come back.
+# Runs kanata with nuphy.kbd for the NuPhy Air75 V3 (cable, Bluetooth, or dongle).
+#
+# nuphy.kbd sets macos-continue-if-no-devs-found, so kanata waits for the NuPhy
+# to enumerate and grabs it when it appears. Do not probe for the device here:
+# ioreg is unreliable from a root LaunchDaemon, and kanata --list aborts (signal 6).
 #
 # Runs as a root LaunchDaemon (see launchd/local.kanata.nuphy.plist).
-# $HOME isn't reliably set -- locate configs relative to this script's path.
 #
 set -uo pipefail
 
@@ -13,20 +14,19 @@ KANATA="/opt/homebrew/opt/kanata/bin/kanata"
 KANATA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NUPHY_CFG="$KANATA_DIR/nuphy.kbd"
 
-nuphy_present() {
-  ioreg -c IOHIDDevice -r -l 2>/dev/null | grep "Air75 V3" > /dev/null
+log() {
+  echo "$(date '+%H:%M:%S') [runner] $*"
 }
 
-wait_for_nuphy() {
-  while ! nuphy_present; do
-    sleep 3
-  done
-  # Give macOS/kanata a moment to enumerate the device after ioreg sees it.
-  sleep 2
+stop_kanata() {
+  pkill -f -- "--cfg $NUPHY_CFG" 2>/dev/null || true
+  sleep 1
 }
 
 while true; do
-  wait_for_nuphy
-  "$KANATA" --cfg "$NUPHY_CFG"
+  log "starting kanata"
+  stop_kanata
+  "$KANATA" --cfg "$NUPHY_CFG" || log "kanata exited with status $?"
+  log "restarting in 3s"
   sleep 3
 done

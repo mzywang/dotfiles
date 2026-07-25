@@ -4,6 +4,7 @@
     "Air75 V3-1"
     "Air75 V3 Dongle"
   )
+  macos-continue-if-no-devs-found yes
   process-unmapped-keys yes
 )
 
