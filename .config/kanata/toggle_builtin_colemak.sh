@@ -14,11 +14,35 @@ LAYER_STATE="$KANATA_DIR/builtin_layer"
 PORT=7071
 HOST=127.0.0.1
 
-send() {
-  printf '%s\n' "$1" | nc -w 1 "$HOST" "$PORT" 2>/dev/null
+request_current_layer() {
+  local line
+  while IFS= read -r line; do
+    if [[ "$line" == *'"CurrentLayerName"'* ]]; then
+      printf '%s' "$line"
+      return 0
+    fi
+  done < <(printf '%s\n' '{"RequestCurrentLayerName":{}}' | nc -w 1 "$HOST" "$PORT" 2>/dev/null)
+  return 1
 }
 
-response="$(send '{"RequestCurrentLayerName":{}}' || true)"
+send_change_layer() {
+  local layer="$1"
+  printf '%s\n' "{\"ChangeLayer\":{\"new\":\"$layer\"}}" | nc -w 1 "$HOST" "$PORT" >/dev/null 2>&1
+}
+
+wait_for_kanata() {
+  local i response
+  for ((i = 1; i <= 40; i++)); do
+    if response="$(request_current_layer)"; then
+      printf '%s' "$response"
+      return 0
+    fi
+    sleep 0.25
+  done
+  return 1
+}
+
+response="$(wait_for_kanata || true)"
 if [[ -z "$response" ]]; then
   echo "kanata built-in server not reachable on port $PORT" >&2
   echo "Is the NuPhy disconnected and the builtin watcher running?" >&2
@@ -26,11 +50,11 @@ if [[ -z "$response" ]]; then
 fi
 
 if [[ "$response" == *'"name":"colemak"'* ]]; then
-  send '{"ChangeLayer":{"new":"qwerty"}}' >/dev/null
+  send_change_layer qwerty
   printf 'qwerty\n' > "$LAYER_STATE"
   echo "Built-in keyboard: QWERTY"
 else
-  send '{"ChangeLayer":{"new":"colemak"}}' >/dev/null
+  send_change_layer colemak
   printf 'colemak\n' > "$LAYER_STATE"
   echo "Built-in keyboard: Colemak"
 fi

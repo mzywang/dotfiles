@@ -30,6 +30,17 @@ send_tcp() {
   printf '%s\n' "$1" | nc -w 1 127.0.0.1 "$BUILTIN_TCP_PORT" 2>/dev/null
 }
 
+request_current_layer() {
+  local line
+  while IFS= read -r line; do
+    if [[ "$line" == *'"CurrentLayerName"'* ]]; then
+      printf '%s' "$line"
+      return 0
+    fi
+  done < <(send_tcp '{"RequestCurrentLayerName":{}}')
+  return 1
+}
+
 restore_builtin_layer() {
   local layer="qwerty"
   if [[ -f "$LAYER_STATE" ]]; then
@@ -37,10 +48,15 @@ restore_builtin_layer() {
   fi
   [[ "$layer" == "colemak" ]] || return 0
 
-  local i
-  for ((i = 1; i <= 20; i++)); do
-    if send_tcp '{"ChangeLayer":{"new":"colemak"}}' | grep -q '"status":"Ok"'; then
-      return 0
+  local i response
+  for ((i = 1; i <= 40; i++)); do
+    if response="$(request_current_layer)"; then
+      if [[ "$response" == *'"name":"colemak"'* ]]; then
+        return 0
+      fi
+      if send_tcp '{"ChangeLayer":{"new":"colemak"}}' | grep -q '"status":"Ok"'; then
+        return 0
+      fi
     fi
     sleep 0.25
   done
