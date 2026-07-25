@@ -118,7 +118,9 @@ builtin-colemak-toggle
 ```
 
 The watcher starts `builtin_cmd_tab.kbd` with a TCP server on port `7071` so
-the toggle script can switch layers without restarting kanata.
+the toggle script can switch layers without restarting kanata. The chosen layer
+is saved to `.config/kanata/builtin_layer` and restored automatically when the
+built-in kanata instance restarts (for example after plugging the NuPhy back in).
 
 Setup on a new machine, in order:
 

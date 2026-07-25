@@ -22,16 +22,39 @@ KANATA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BLOCK_CFG="$KANATA_DIR/builtin_block.kbd"
 CMD_TAB_CFG="$KANATA_DIR/builtin_cmd_tab.kbd"
 BUILTIN_TCP_PORT=7071
+LAYER_STATE="$KANATA_DIR/builtin_layer"
 
 current_cfg=""
+
+send_tcp() {
+  printf '%s\n' "$1" | nc -w 1 127.0.0.1 "$BUILTIN_TCP_PORT" 2>/dev/null
+}
+
+restore_builtin_layer() {
+  local layer="qwerty"
+  if [[ -f "$LAYER_STATE" ]]; then
+    layer="$(tr -d '[:space:]' < "$LAYER_STATE")"
+  fi
+  [[ "$layer" == "colemak" ]] || return 0
+
+  local i
+  for ((i = 1; i <= 20; i++)); do
+    if send_tcp '{"ChangeLayer":{"new":"colemak"}}' | grep -q '"status":"Ok"'; then
+      return 0
+    fi
+    sleep 0.25
+  done
+}
 
 start() {
   if [[ "$1" == "$CMD_TAB_CFG" ]]; then
     "$KANATA" --cfg "$1" --port "$BUILTIN_TCP_PORT" &
+    current_cfg="$1"
+    restore_builtin_layer
   else
     "$KANATA" --cfg "$1" &
+    current_cfg="$1"
   fi
-  current_cfg="$1"
 }
 
 stop_all() {
