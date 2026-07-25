@@ -1,0 +1,3 @@
+# Allow kanata unlock watcher to restart system LaunchDaemons without a prompt.
+# Installed by install_unlock_watcher.sh into /etc/sudoers.d/kanata.
+__USER__ ALL=(ALL) NOPASSWD: /bin/launchctl kickstart -k system/local.kanata.nuphy, /bin/launchctl kickstart -k system/local.kanata.builtin-watcher

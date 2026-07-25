@@ -65,7 +65,8 @@ the file directly (no `yq` required).
 | `.config/zed/settings.json` | Zed editor settings |
 | `.config/cmux/cmux.json` | cmux config (JSONC) |
 | `.config/kanata/nuphy.kbd` | kanata config: NuPhy Air75 V3 home row mods (Colemak firmware layout) + Cmd-Tab block |
-| `.config/kanata/nuphy_kanata_runner.sh` | waits for the NuPhy to appear, then runs `nuphy.kbd`; used by the `local.kanata.nuphy` LaunchDaemon so boot doesn't race the dongle |
+| `.config/kanata/nuphy_kanata_runner.sh` | waits for the NuPhy to appear, supervises kanata with `nuphy.kbd`, and restarts it on disconnect/reconnect, DriverKit wedges, or wake; used by the `local.kanata.nuphy` LaunchDaemon |
+| `.config/kanata/kanata_unlock_watcher.sh` | user-session LaunchAgent that kickstarts kanata daemons after screen unlock |
 | `.config/kanata/builtin_cmd_tab.kbd` | kanata config for the built-in keyboard when the NuPhy is disconnected: Cmd-Tab block, caps→esc, and a toggleable Colemak-DH layer (keep macOS on U.S. QWERTY) |
 | `.config/kanata/toggle_builtin_colemak.sh` | toggles the built-in keyboard between QWERTY and Colemak via kanata's TCP server (`builtin-colemak-toggle` alias) |
 | `.config/kanata/builtin_block.kbd` | kanata config: blocks every key on the built-in keyboard (used when the NuPhy is connected) |
@@ -77,6 +78,7 @@ the file directly (no `yq` required).
 | `kanata_setup.sh` | One-time sudo setup: VirtualHIDDevice driver + LaunchDaemons for kanata |
 | `install_builtin_watcher.sh` | Installs/reloads just the `local.kanata.builtin-watcher` daemon; re-run any time after editing the watcher plist or script (aliased as `builtin-watcher-install`) |
 | `install_nuphy_runner.sh` | Installs/reloads just the `local.kanata.nuphy` daemon; re-run any time after editing the runner plist or script (aliased as `nuphy-install`) |
+| `install_unlock_watcher.sh` | Installs/reloads the screen-unlock kanata restart agent (aliased as `unlock-watcher-install`) |
 
 ### Kanata (NuPhy home row mods + Cmd-Tab block + built-in keyboard disable)
 
@@ -91,7 +93,10 @@ NuPhy by device name (covers cable, Bluetooth, and 2.4GHz dongle modes) and
 also blocks Cmd-Tab. Because the dongle can take a while to enumerate after
 login, `nuphy_kanata_runner.sh` polls for the NuPhy before starting kanata
 instead of launching it directly at boot (which used to fail repeatedly until
-the device appeared).
+the device appeared). The runner supervises kanata in the background and
+restarts it when the NuPhy disconnects, wedges in the DriverKit virtual-HID
+wait loop, or after a system wake. `kanata_unlock_watcher.sh` (a user
+LaunchAgent) kickstarts the daemons on screen unlock.
 
 The built-in keyboard is owned by a second, separate kanata instance, but
 unlike the NuPhy it can't just run one static config, since we want it to
@@ -139,6 +144,9 @@ Setup on a new machine, in order:
    sudo launchctl kickstart -k system/local.kanata.nuphy
    sudo launchctl kickstart -k system/local.kanata.builtin-watcher
    ```
+5. Run `./install_unlock_watcher.sh` so kanata restarts automatically after
+   screen unlock (installs a LaunchAgent and a sudoers drop-in for passwordless
+   `launchctl kickstart`).
 
 Karabiner-Elements is not used at all in this setup and should not be
 installed alongside it — it ships a conflicting version of the same
