@@ -1,3 +1,11 @@
+;; Built-in Mac keyboard: Cmd-Tab block, caps->esc, optional Colemak-DH layer.
+;; Keep macOS on U.S. QWERTY; toggle Colemak with toggle_builtin_colemak.sh.
+;;
+;; Colemak layout (apostrophe on p, semicolon on the key right of l):
+;;   qwfpbjluy'[]\
+;;   arstgmneio;
+;;   zxcdvkh,./
+
 (defcfg
   macos-dev-names-include (
     "Apple Internal Keyboard / Trackpad"
@@ -6,7 +14,13 @@
 )
 
 (defsrc
-  tab caps
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  tab  q    w    e    r    t    y    u    i    o    p    [    ]    \
+  caps a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+  left down up   rght
 )
 
 (defalias
@@ -16,6 +30,22 @@
       )
 )
 
-(deflayer base
-  @tab esc
+(deflayer qwerty
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  @tab q    w    e    r    t    y    u    i    o    p    [    ]    \
+  esc  a    s    d    f    g    h    j    k    l    ;    '    ret
+  lsft z    x    c    v    b    n    m    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+  left down up   rght
+)
+
+(deflayer colemak
+  esc  f1   f2   f3   f4   f5   f6   f7   f8   f9   f10  f11  f12
+  grv  1    2    3    4    5    6    7    8    9    0    -    =    bspc
+  @tab q    w    f    p    b    j    l    u    y    '    [    ]    \
+  esc  a    r    s    t    g    m    n    e    i    o    ;    ret
+  lsft z    x    c    d    v    k    h    ,    .    /    rsft
+  lctl lmet lalt           spc            ralt rmet rctl
+  left down up   rght
 )

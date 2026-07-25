@@ -6,7 +6,7 @@
 #   - connected:    builtin_block.kbd (blocks every key -- replicates
 #                   Karabiner-Elements' old "disable built-in keyboard
 #                   while this device is connected" toggle)
-#   - disconnected: builtin_cmd_tab.kbd (just blocks Cmd-Tab, as before)
+#   - disconnected: builtin_cmd_tab.kbd (Cmd-Tab block, caps->esc, optional Colemak layer)
 #
 # Only one process can hold the built-in keyboard device at a time, so this
 # always stops one before starting the other rather than running both.
@@ -21,11 +21,16 @@ KANATA="/opt/homebrew/opt/kanata/bin/kanata"
 KANATA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 BLOCK_CFG="$KANATA_DIR/builtin_block.kbd"
 CMD_TAB_CFG="$KANATA_DIR/builtin_cmd_tab.kbd"
+BUILTIN_TCP_PORT=7071
 
 current_cfg=""
 
 start() {
-  "$KANATA" --cfg "$1" &
+  if [[ "$1" == "$CMD_TAB_CFG" ]]; then
+    "$KANATA" --cfg "$1" --port "$BUILTIN_TCP_PORT" &
+  else
+    "$KANATA" --cfg "$1" &
+  fi
   current_cfg="$1"
 }
 
