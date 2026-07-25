@@ -18,7 +18,8 @@ VHID_DAEMON="system/org.pqrs.Karabiner-VirtualHIDDevice-Daemon"
 
 POLL_INTERVAL=5
 STUCK_VHID_LINES=50
-GRAB_TIMEOUT=45
+GRAB_TIMEOUT=60
+MIN_RUN_BEFORE_STUCK_CHECK=15
 
 nuphy_present() {
   ioreg -c IOHIDDevice -r -l 2>/dev/null | grep -q "Air75 V3"
@@ -30,6 +31,33 @@ wait_for_nuphy() {
   done
   # Give macOS/kanata a moment to enumerate the device after ioreg sees it.
   sleep 2
+}
+
+log_line_count() {
+  if [[ -f "$LOG" ]]; then
+    wc -l < "$LOG" | tr -d ' '
+  else
+    echo 0
+  fi
+}
+
+session_log() {
+  local offset="$1"
+  tail -n +"$((offset + 1))" "$LOG" 2>/dev/null
+}
+
+grabbed_since() {
+  local offset="$1"
+  session_log "$offset" | grep -q "keyboard grabbed, entering event processing loop"
+}
+
+stuck_in_virtual_hid_since() {
+  local offset="$1"
+  local tail_lines non_vhid
+  tail_lines=$(session_log "$offset" | tail "$STUCK_VHID_LINES") || return 1
+  [[ -n "$tail_lines" ]] || return 1
+  non_vhid=$(printf '%s\n' "$tail_lines" | grep -cv "virtual_hid_keyboard_ready true" || true)
+  [[ "$non_vhid" -eq 0 ]]
 }
 
 get_wake_time() {
@@ -47,21 +75,8 @@ stop_kanata() {
 }
 
 start_kanata() {
-  ensure_vhid_daemon
   "$KANATA" --cfg "$NUPHY_CFG" &
   echo $!
-}
-
-recently_grabbed() {
-  tail -200 "$LOG" 2>/dev/null | grep -q "keyboard grabbed, entering event processing loop"
-}
-
-stuck_in_virtual_hid() {
-  local tail_lines non_vhid
-  tail_lines=$(tail "$STUCK_VHID_LINES" "$LOG" 2>/dev/null) || return 1
-  [[ -n "$tail_lines" ]] || return 1
-  non_vhid=$(printf '%s\n' "$tail_lines" | grep -cv "virtual_hid_keyboard_ready true" || true)
-  [[ "$non_vhid" -eq 0 ]]
 }
 
 last_wake="$(get_wake_time)"
@@ -70,8 +85,10 @@ while true; do
   wait_for_nuphy
   stop_kanata
 
+  log_offset="$(log_line_count)"
   kanata_pid="$(start_kanata)"
   started_at=$SECONDS
+  recovered_vhid=0
 
   while nuphy_present && kill -0 "$kanata_pid" 2>/dev/null; do
     current_wake="$(get_wake_time)"
@@ -80,11 +97,35 @@ while true; do
     fi
     last_wake="$current_wake"
 
-    if (( SECONDS - started_at > GRAB_TIMEOUT )) && ! recently_grabbed; then
+    if grabbed_since "$log_offset"; then
+      sleep "$POLL_INTERVAL"
+      continue
+    fi
+
+    if (( SECONDS - started_at > GRAB_TIMEOUT )); then
+      if (( recovered_vhid == 0 )); then
+        ensure_vhid_daemon
+        recovered_vhid=1
+        log_offset="$(log_line_count)"
+        stop_kanata
+        kanata_pid="$(start_kanata)"
+        started_at=$SECONDS
+        continue
+      fi
       break
     fi
 
-    if stuck_in_virtual_hid; then
+    if (( SECONDS - started_at > MIN_RUN_BEFORE_STUCK_CHECK )) \
+      && stuck_in_virtual_hid_since "$log_offset"; then
+      if (( recovered_vhid == 0 )); then
+        ensure_vhid_daemon
+        recovered_vhid=1
+        log_offset="$(log_line_count)"
+        stop_kanata
+        kanata_pid="$(start_kanata)"
+        started_at=$SECONDS
+        continue
+      fi
       break
     fi
 
