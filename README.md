@@ -64,7 +64,7 @@ the file directly (no `yq` required).
 | `.config/ghostty/config` | Ghostty terminal config |
 | `.config/zed/settings.json` | Zed editor settings |
 | `.config/cmux/cmux.json` | cmux config (JSONC) |
-| `.config/kanata/nuphy.kbd` | kanata config: NuPhy Air75 V3 home row mods (Colemak firmware layout) + Cmd-Tab block |
+| `.config/kanata/nuphy.kbd` | kanata config: NuPhy Air75 V3 Cmd-Tab block |
 | `.config/kanata/nuphy_kanata_runner.sh` | waits for the NuPhy to appear, supervises kanata with `nuphy.kbd`, and restarts it on disconnect/reconnect, DriverKit wedges, or wake; used by the `local.kanata.nuphy` LaunchDaemon |
 | `.config/kanata/kanata_unlock_watcher.sh` | user-session LaunchAgent that kickstarts kanata daemons after screen unlock |
 | `.config/kanata/builtin_cmd_tab.kbd` | kanata config for the built-in keyboard when the NuPhy is disconnected: Cmd-Tab block, caps→esc, and a toggleable Colemak-DH layer (keep macOS on U.S. QWERTY) |
@@ -80,17 +80,11 @@ the file directly (no `yq` required).
 | `install_nuphy_runner.sh` | Installs/reloads just the `local.kanata.nuphy` daemon; re-run any time after editing the runner plist or script (aliased as `nuphy-install`) |
 | `install_unlock_watcher.sh` | Installs/reloads the screen-unlock kanata restart agent (aliased as `unlock-watcher-install`) |
 
-### Kanata (NuPhy home row mods + Cmd-Tab block + built-in keyboard disable)
+### Kanata (Cmd-Tab block + built-in keyboard disable)
 
-Home row mods (`a r s t` → left Cmd/Opt/Ctrl/Shift, `n e i o` → right
-Shift/Ctrl/Opt/Cmd, matching the Colemak firmware layout on the NuPhy) run
-through [kanata](https://github.com/jtroo/kanata) rather than
-Karabiner-Elements — its `tap-hold-tap-keys` action can whitelist specific
-"safe interrupt" keys per mod-tap key, which fixes fast same-hand rolls
-(e.g. alternating `s`/`t`) misfiring as modifiers, something Karabiner's
-elapsed-time-only model can't do. `.config/kanata/nuphy.kbd` is scoped to the
-NuPhy by device name (covers cable, Bluetooth, and 2.4GHz dongle modes) and
-also blocks Cmd-Tab. Because the dongle can take a while to enumerate after
+[kanata](https://github.com/jtroo/kanata) blocks Cmd-Tab on the NuPhy via
+`.config/kanata/nuphy.kbd`, scoped to the device by name (covers cable,
+Bluetooth, and 2.4GHz dongle modes). Because the dongle can take a while to enumerate after
 login, `nuphy_kanata_runner.sh` polls for the NuPhy before starting kanata
 instead of launching it directly at boot (which used to fail repeatedly until
 the device appeared). The runner supervises kanata in the background and
