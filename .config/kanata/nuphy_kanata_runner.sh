@@ -3,8 +3,8 @@
 # Runs kanata with nuphy.kbd for the NuPhy Air75 V3 (cable, Bluetooth, or dongle).
 # Restarts when kanata exits or the NuPhy disconnects.
 #
-# nuphy.kbd sets macos-continue-if-no-devs-found, so kanata can start before the
-# keyboard enumerates and will grab it when it appears.
+# Do NOT call `kanata --list` from this script -- it aborts (signal 6) when run as
+# a root LaunchDaemon. Use ioreg for device presence instead.
 #
 # Runs as a root LaunchDaemon (see launchd/local.kanata.nuphy.plist).
 #
@@ -13,15 +13,13 @@ set -uo pipefail
 KANATA="/opt/homebrew/opt/kanata/bin/kanata"
 KANATA_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 NUPHY_CFG="$KANATA_DIR/nuphy.kbd"
-VHID_DAEMON="system/org.pqrs.Karabiner-VirtualHIDDevice-Daemon"
 
 log() {
   echo "$(date '+%H:%M:%S') [runner] $*"
 }
 
-# Use kanata's own device list -- more reliable than ioreg from a LaunchDaemon.
 nuphy_present() {
-  "$KANATA" --list 2>/dev/null | grep -q "Air75 V3"
+  ioreg -c IOHIDDevice -r -l 2>/dev/null | grep -q "Air75 V3"
 }
 
 stop_kanata() {
@@ -29,40 +27,30 @@ stop_kanata() {
   sleep 1
 }
 
-ensure_vhid_daemon() {
-  launchctl kickstart -k "$VHID_DAEMON" 2>/dev/null || true
-  sleep 2
-}
+while true; do
+  while ! nuphy_present; do
+    log "waiting for NuPhy"
+    sleep 3
+  done
 
-start_disconnect_monitor() {
+  log "NuPhy detected, starting kanata"
+  stop_kanata
+  sleep 2
+
+  # Stop kanata when the NuPhy disappears so the outer loop can restart cleanly.
   (
-    while ! nuphy_present; do
-      sleep 2
-    done
-    log "NuPhy connected, watching for disconnect"
     while nuphy_present; do
-      sleep 2
+      sleep 3
     done
     log "NuPhy disconnected, stopping kanata"
     stop_kanata
   ) &
-  echo $!
-}
+  mon=$!
 
-while true; do
+  "$KANATA" --cfg "$NUPHY_CFG" || log "kanata exited with status $?"
+
+  kill "$mon" 2>/dev/null || true
+  wait "$mon" 2>/dev/null || true
   stop_kanata
-  ensure_vhid_daemon
-
-  log "starting kanata"
-  disconnect_mon="$(start_disconnect_monitor)"
-
-  if ! "$KANATA" --cfg "$NUPHY_CFG"; then
-    log "kanata exited with status $?"
-  fi
-
-  kill "$disconnect_mon" 2>/dev/null || true
-  wait "$disconnect_mon" 2>/dev/null || true
-  stop_kanata
-  log "restarting in 3s"
   sleep 3
 done
