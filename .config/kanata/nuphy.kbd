@@ -19,9 +19,15 @@
         ((input real lmet)) XX break
         () tab break
       )
-  ;; One small notch per press; mwheel dirs swapped for macOS kanata output.
-  pgscroll-up   (macro (mwheel-down 1 20))
-  pgscroll-down (macro (mwheel-up 1 20))
+  ;; ~10 scroll units spread over ~80ms; mwheel dirs swapped for macOS kanata.
+  pgscroll-up (macro
+    (mwheel-down 1 2) 20 (mwheel-down 1 2) 20 (mwheel-down 1 2) 20
+    (mwheel-down 1 2) 20 (mwheel-down 1 2)
+  )
+  pgscroll-down (macro
+    (mwheel-up 1 2) 20 (mwheel-up 1 2) 20 (mwheel-up 1 2) 20
+    (mwheel-up 1 2) 20 (mwheel-up 1 2)
+  )
 )
 
 (deflayer base
