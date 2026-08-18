@@ -1,8 +1,10 @@
 #!/usr/bin/env bash
 #
 # Manages the single kanata instance that owns the built-in keyboard,
-# switching between two configs based on whether the NuPhy Air75 V3 is
-# connected (in any mode: cable, Bluetooth, or 2.4GHz dongle):
+# switching between two configs based on whether an external keyboard is
+# connected (NuPhy Air75 V3 in any mode, or Dygma Sonsei over BLE).
+# BLE detection runs in a user LaunchAgent (external_keyboard_detector.sh)
+# because root LaunchDaemons cannot see Bluetooth HID devices.
 #   - connected:    builtin_block.kbd (blocks every key -- replicates
 #                   Karabiner-Elements' old "disable built-in keyboard
 #                   while this device is connected" toggle)
@@ -23,6 +25,7 @@ BLOCK_CFG="$KANATA_DIR/builtin_block.kbd"
 CMD_TAB_CFG="$KANATA_DIR/builtin_cmd_tab.kbd"
 BUILTIN_TCP_PORT=7071
 LAYER_STATE="$KANATA_DIR/builtin_layer"
+EXTERNAL_KEYBOARD_STATE="/var/tmp/kanata-external-keyboard"
 
 current_cfg=""
 
@@ -78,8 +81,18 @@ stop_all() {
   pkill -f -- "--cfg $CMD_TAB_CFG" 2>/dev/null
 }
 
+external_keyboard_connected() {
+  # BLE keyboards are only visible in the logged-in user session; the detector
+  # LaunchAgent writes /var/tmp/kanata-external-keyboard for us to read here.
+  if [[ -f "$EXTERNAL_KEYBOARD_STATE" ]] && [[ "$(<"$EXTERNAL_KEYBOARD_STATE")" == "1" ]]; then
+    return 0
+  fi
+  # USB keyboards (e.g. NuPhy dongle) may still be visible to root via ioreg.
+  grep -qE 'Air75 V3|Sonsei' < <(ioreg -r -c IOHIDDevice 2>/dev/null | grep '"Product"')
+}
+
 while true; do
-  if ioreg -c IOHIDDevice -r -l 2>/dev/null | grep "Air75 V3" > /dev/null; then
+  if external_keyboard_connected; then
     desired_cfg="$BLOCK_CFG"
   else
     desired_cfg="$CMD_TAB_CFG"

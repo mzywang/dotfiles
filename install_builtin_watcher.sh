@@ -34,5 +34,8 @@ sudo chown root:wheel "$PLIST_DEST"
 sudo chmod 644 "$PLIST_DEST"
 sudo launchctl bootstrap system "$PLIST_DEST"
 
+echo "==> Installing BLE/USB external keyboard detector (user LaunchAgent)"
+"$DOTFILES_DIR/install_external_keyboard_detector.sh"
+
 echo "==> Status:"
 sudo launchctl list | grep -E "kanata|pqrs" || true
