@@ -45,7 +45,7 @@ wait_for_kanata() {
 response="$(wait_for_kanata || true)"
 if [[ -z "$response" ]]; then
   echo "kanata built-in server not reachable on port $PORT" >&2
-  echo "Is the NuPhy disconnected and the builtin watcher running?" >&2
+  echo "Is the external keyboard disconnected and the builtin watcher running?" >&2
   exit 1
 fi
 

@@ -69,14 +69,16 @@ the file directly (no `yq` required).
 | `.config/kanata/kanata_unlock_watcher.sh` | user-session LaunchAgent that kickstarts kanata daemons after screen unlock |
 | `.config/kanata/builtin_cmd_tab.kbd` | kanata config for the built-in keyboard when the NuPhy is disconnected: Cmd-Tab block, caps→esc, and a toggleable Colemak-DH layer (keep macOS on U.S. QWERTY) |
 | `.config/kanata/toggle_builtin_colemak.sh` | toggles the built-in keyboard between QWERTY and Colemak via kanata's TCP server (`builtin-colemak-toggle` alias) |
-| `.config/kanata/builtin_block.kbd` | kanata config: blocks every key on the built-in keyboard (used when the NuPhy is connected) |
-| `.config/kanata/nuphy_builtin_keyboard_watcher.sh` | polls for the NuPhy and switches the built-in keyboard's kanata instance between the two configs above |
+| `.config/kanata/builtin_block.kbd` | kanata config: blocks every key on the built-in keyboard (used when an external keyboard is connected) |
+| `.config/kanata/external_keyboard_detector.sh` | user-session LaunchAgent helper: polls `hidutil` for NuPhy/Sonsei and writes `/var/tmp/kanata-external-keyboard` for the root watcher (required for BLE) |
+| `.config/kanata/nuphy_builtin_keyboard_watcher.sh` | polls for the NuPhy or Dygma Sonsei and switches the built-in keyboard's kanata instance between the two configs above |
 | `launchd/*.plist` | LaunchDaemon templates for kanata + its VirtualHIDDevice daemon (installed by `kanata_setup.sh`, not symlinked) |
 | `packages.yaml` | Homebrew taps / formulae / casks |
 | `bootstrap.sh` | Installs software from `packages.yaml` |
 | `install.sh` | Symlinks configs into `$HOME` |
 | `kanata_setup.sh` | One-time sudo setup: VirtualHIDDevice driver + LaunchDaemons for kanata |
-| `install_builtin_watcher.sh` | Installs/reloads just the `local.kanata.builtin-watcher` daemon; re-run any time after editing the watcher plist or script (aliased as `builtin-watcher-install`) |
+| `install_builtin_watcher.sh` | Installs/reloads the `local.kanata.builtin-watcher` daemon and the BLE `local.kanata.external-keyboard-detector` agent (aliased as `builtin-watcher-install`) |
+| `install_external_keyboard_detector.sh` | Installs/reloads just the `local.kanata.external-keyboard-detector` agent (aliased as `external-keyboard-detector-install`) |
 | `install_nuphy_runner.sh` | Installs/reloads just the `local.kanata.nuphy` daemon; re-run any time after editing the runner plist or script (aliased as `nuphy-install`) |
 | `install_unlock_watcher.sh` | Installs/reloads the screen-unlock kanata restart agent (aliased as `unlock-watcher-install`) |
 
@@ -93,18 +95,22 @@ wait loop, or after a system wake. `kanata_unlock_watcher.sh` (a user
 LaunchAgent) kickstarts the daemons on screen unlock.
 
 The built-in keyboard is owned by a second, separate kanata instance, but
-unlike the NuPhy it can't just run one static config, since we want it to
-behave differently depending on whether the NuPhy is around: normally it
-should just block Cmd-Tab, but while the NuPhy is connected it should be
-fully disabled (replicating Karabiner-Elements' old "disable built-in
-keyboard while external keyboard is connected" toggle, so the laptop's own
-keys can't double-type alongside the NuPhy). Kanata has no built-in notion of
-"device A present → block device B", and macOS device-list config
-(`macos-dev-names-include`) isn't live-reloadable anyway, so
-`.config/kanata/nuphy_builtin_keyboard_watcher.sh` polls `kanata --list`
-every few seconds for the NuPhy and swaps which config owns the built-in
-keyboard: `builtin_block.kbd` (blocks every key) while it's connected,
-`builtin_cmd_tab.kbd` (Cmd-Tab block, caps→esc, optional Colemak layer) while it's not. Only one process
+unlike external keyboards it can't just run one static config, since we want
+it to behave differently depending on whether an external keyboard is around:
+normally it should just block Cmd-Tab, but while the NuPhy or Dygma Sonsei is
+connected it should be fully disabled (replicating Karabiner-Elements' old
+"disable built-in keyboard while external keyboard is connected" toggle, so
+the laptop's own keys can't double-type alongside the external board). Kanata
+has no built-in notion of "device A present → block device B", and macOS
+device-list config (`macos-dev-names-include`) isn't live-reloadable anyway,
+so `.config/kanata/nuphy_builtin_keyboard_watcher.sh` polls for a NuPhy
+Air75 V3 or Sonsei and swaps which config owns the built-in keyboard:
+`builtin_block.kbd` (blocks every key) while one is connected,
+`builtin_cmd_tab.kbd` (Cmd-Tab block, caps→esc, optional Colemak layer) while
+neither is. BLE keyboards are only visible in the logged-in user session, so
+`.config/kanata/external_keyboard_detector.sh` (a LaunchAgent) polls
+`hidutil` and writes `/var/tmp/kanata-external-keyboard` for the root watcher
+to read; USB dongles can still be detected directly via `ioreg`. Only one process
 can hold the device at a time, so the watcher always stops the previous one
 before starting the other.
 
