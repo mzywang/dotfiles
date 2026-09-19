@@ -10,18 +10,25 @@
 #   git clone https://github.com/mzywang/dotfiles.git ~/.dotfiles
 #   ~/.dotfiles/ubuntu-setup/bootstrap.sh
 #
-# Everything below the "brewuser" setup runs as brewuser, not root.
+# You'll be prompted to set brewuser's password when it's created, and again
+# whenever brewuser's own sudo calls below need it (regular, password-backed
+# sudo — not passwordless). Everything below the "brewuser" setup runs as
+# brewuser, not root.
 set -euo pipefail
 
 BREW_USER="brewuser"
 
 if [[ "$(id -u)" -eq 0 ]]; then
+  if ! command -v adduser >/dev/null 2>&1 || ! command -v sudo >/dev/null 2>&1; then
+    echo "==> Installing adduser/sudo"
+    apt-get update -qq
+    apt-get install -y adduser sudo
+  fi
+
   if ! id -u "$BREW_USER" >/dev/null 2>&1; then
-    echo "==> Creating $BREW_USER"
-    adduser --disabled-password --gecos "" "$BREW_USER"
+    echo "==> Creating $BREW_USER (you'll be asked to set its password)"
+    adduser --gecos "" "$BREW_USER"
     usermod -aG sudo "$BREW_USER"
-    echo "$BREW_USER ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/$BREW_USER"
-    chmod 0440 "/etc/sudoers.d/$BREW_USER"
   fi
 
   BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
