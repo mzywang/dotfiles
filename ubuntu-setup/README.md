@@ -8,26 +8,24 @@ and the Claude Code CLI.
 
 1. Create the machine and SSH in as root (e.g. a DigitalOcean droplet via
    Termius).
-2. Create a normal user with sudo access — **Homebrew refuses to install as
-   root**:
+2. Clone the dotfiles and run the bootstrap script:
    ```sh
-   adduser <username>
-   usermod -aG sudo <username>
-   ```
-3. Switch to that user and run the bootstrap script:
-   ```sh
-   su - <username>
    git clone https://github.com/mzywang/dotfiles.git ~/.dotfiles
    ~/.dotfiles/ubuntu-setup/bootstrap.sh
    ```
-4. Open a new shell (or `source ~/.bashrc`), then sign in:
+3. Open a new shell as `brewuser` (or `source ~/.bashrc` there), then sign in:
    ```sh
+   su - brewuser
    gh auth login
    claude
    ```
 
 ## What `bootstrap.sh` does
 
+- If run as root: creates a `brewuser` account with passwordless sudo
+  (**Homebrew refuses to install as root**), copies this dotfiles checkout
+  into `brewuser`'s home directory, and re-runs itself as `brewuser` — every
+  install step below happens under that account, not root.
 - Installs the apt packages Homebrew needs on Linux (`build-essential`,
   `procps`, `curl`, `file`, `git`).
 - Installs Homebrew (Linuxbrew) if it isn't already present, and adds
@@ -37,8 +35,13 @@ and the Claude Code CLI.
 - Installs the [Claude Code CLI](https://claude.ai/install.sh) if it isn't
   already present.
 
-Safe to re-run: `brew install` and the Claude Code installer are both
-idempotent.
+Safe to re-run: creating `brewuser` is a no-op if it already exists, and
+`brew install` and the Claude Code installer are both idempotent.
+
+Already have your own non-root sudo user and would rather not use
+`brewuser`/passwordless sudo? Just run `ubuntu-setup/bootstrap.sh` directly
+as that user — the root/`brewuser` handoff above only kicks in when the
+script is run as root.
 
 ## Managing packages
 

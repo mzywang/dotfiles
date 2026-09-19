@@ -1,22 +1,46 @@
 #!/usr/bin/env bash
 #
 # Bootstrap a fresh Ubuntu machine (e.g. a new DigitalOcean droplet) with:
+#   - a non-root "brewuser" account (Homebrew refuses to run as root)
 #   - Homebrew (Linuxbrew)
 #   - the packages in packages.yaml (currently: gh, tmux)
 #   - the Claude Code CLI
 #
-# Usage:
+# Usage (as root, right after SSH-ing into a fresh box):
 #   git clone https://github.com/mzywang/dotfiles.git ~/.dotfiles
 #   ~/.dotfiles/ubuntu-setup/bootstrap.sh
 #
-# Homebrew refuses to run as root, so do this as a normal sudo-capable user
-# (see README.md for creating one on a fresh droplet), not as root.
+# Everything below the "brewuser" setup runs as brewuser, not root.
 set -euo pipefail
 
+BREW_USER="brewuser"
+
 if [[ "$(id -u)" -eq 0 ]]; then
-  echo "error: don't run this as root — Homebrew refuses to install as root." >&2
-  echo "       create a normal user with sudo access and re-run as that user." >&2
-  exit 1
+  if ! id -u "$BREW_USER" >/dev/null 2>&1; then
+    echo "==> Creating $BREW_USER"
+    adduser --disabled-password --gecos "" "$BREW_USER"
+    usermod -aG sudo "$BREW_USER"
+    echo "$BREW_USER ALL=(ALL) NOPASSWD:ALL" > "/etc/sudoers.d/$BREW_USER"
+    chmod 0440 "/etc/sudoers.d/$BREW_USER"
+  fi
+
+  BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+  DOTFILES_ROOT="$(cd "$BOOTSTRAP_DIR/.." && pwd)"
+  BREW_USER_HOME="$(getent passwd "$BREW_USER" | cut -d: -f6)"
+  BREW_USER_DOTFILES="$BREW_USER_HOME/.dotfiles"
+
+  # Give brewuser its own copy of this checkout so it doesn't need access
+  # to wherever root cloned it (e.g. under /root, which brewuser can't read).
+  if [[ "$DOTFILES_ROOT" != "$BREW_USER_DOTFILES" ]]; then
+    echo "==> Copying dotfiles to $BREW_USER_DOTFILES"
+    rm -rf "$BREW_USER_DOTFILES"
+    cp -r "$DOTFILES_ROOT" "$BREW_USER_DOTFILES"
+    chown -R "$BREW_USER:$BREW_USER" "$BREW_USER_DOTFILES"
+  fi
+
+  echo "==> Continuing as $BREW_USER"
+  su - "$BREW_USER" -c "$BREW_USER_DOTFILES/ubuntu-setup/bootstrap.sh"
+  exit $?
 fi
 
 BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
