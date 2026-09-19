@@ -8,14 +8,19 @@ and the Claude Code CLI.
 
 1. Create the machine and SSH in as root (e.g. a DigitalOcean droplet via
    Termius).
-2. Clone the dotfiles and run the bootstrap script. You'll be prompted to
+2. Install git — a fresh Ubuntu image doesn't ship with it, and you need it
+   to clone this repo in the first place:
+   ```sh
+   apt-get update && apt-get install -y git
+   ```
+3. Clone the dotfiles and run the bootstrap script. You'll be prompted to
    set `brewuser`'s password when it's created, and again whenever a `sudo`
    step needs it:
    ```sh
    git clone https://github.com/mzywang/dotfiles.git ~/.dotfiles
    ~/.dotfiles/ubuntu-setup/bootstrap.sh
    ```
-3. Open a new shell as `brewuser` (or `source ~/.bashrc` there), then sign in:
+4. Open a new shell as `brewuser` (or `source ~/.bashrc` there), then sign in:
    ```sh
    su - brewuser
    gh auth login

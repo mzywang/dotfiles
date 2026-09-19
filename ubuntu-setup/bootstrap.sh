@@ -7,6 +7,7 @@
 #   - the Claude Code CLI
 #
 # Usage (as root, right after SSH-ing into a fresh box):
+#   apt-get update && apt-get install -y git   # not preinstalled; needed to clone this repo
 #   git clone https://github.com/mzywang/dotfiles.git ~/.dotfiles
 #   ~/.dotfiles/ubuntu-setup/bootstrap.sh
 #
@@ -19,10 +20,10 @@ set -euo pipefail
 BREW_USER="brewuser"
 
 if [[ "$(id -u)" -eq 0 ]]; then
-  if ! command -v adduser >/dev/null 2>&1 || ! command -v sudo >/dev/null 2>&1; then
-    echo "==> Installing adduser/sudo"
+  if ! command -v adduser >/dev/null 2>&1 || ! command -v sudo >/dev/null 2>&1 || ! command -v git >/dev/null 2>&1; then
+    echo "==> Installing adduser/sudo/git"
     apt-get update -qq
-    apt-get install -y adduser sudo
+    apt-get install -y adduser sudo git
   fi
 
   if ! id -u "$BREW_USER" >/dev/null 2>&1; then
