@@ -35,7 +35,8 @@ if [[ "$(id -u)" -eq 0 ]]; then
   BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   DOTFILES_ROOT="$(cd "$BOOTSTRAP_DIR/.." && pwd)"
   BREW_USER_HOME="$(getent passwd "$BREW_USER" | cut -d: -f6)"
-  BREW_USER_DOTFILES="$BREW_USER_HOME/.dotfiles"
+  # Keep whatever name root cloned this repo under (e.g. ~/mzywang, ~/.dotfiles).
+  BREW_USER_DOTFILES="$BREW_USER_HOME/$(basename "$DOTFILES_ROOT")"
 
   # Give brewuser its own copy of this checkout so it doesn't need access
   # to wherever root cloned it (e.g. under /root, which brewuser can't read).
