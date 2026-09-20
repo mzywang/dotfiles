@@ -22,14 +22,16 @@ claude
 ## Installs
 
 Homebrew, then via `brew`: `gh`, `tmux` ([`packages.yaml`](packages.yaml)).
-Also installs the Claude Code CLI. Safe to re-run.
+Also installs the Claude Code CLI. Safe to re-run. Finishes by running
+`verify.sh` (see below).
 
-`bootstrap.sh` finishes by running `verify.sh`, which checks that everything
-above actually got installed and is on `PATH`. Re-run it any time on its own:
+## Flags
 
-```sh
-~/mzywang/dotfiles/ubuntu-setup/verify.sh
-```
+- `--verify` — check that everything above is installed and on `PATH`,
+  without installing anything. Same as running `verify.sh` directly.
+- `--teardown` — uninstall Homebrew (and everything it installed: `gh`,
+  `tmux`) and remove the Claude Code CLI. Leaves the `brewuser` account and
+  its home directory alone.
 
 ## brewuser
 
