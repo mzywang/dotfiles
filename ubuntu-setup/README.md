@@ -6,8 +6,9 @@ Bootstrap script for a fresh Ubuntu machine.
 
 ```sh
 apt-get update && apt-get install -y git
-git clone https://github.com/mzywang/dotfiles.git ~/.dotfiles
-~/.dotfiles/ubuntu-setup/bootstrap.sh
+mkdir ~/mzywang && cd ~/mzywang
+git clone https://github.com/mzywang/dotfiles.git
+./dotfiles/ubuntu-setup/bootstrap.sh
 ```
 
 Then sign in:
