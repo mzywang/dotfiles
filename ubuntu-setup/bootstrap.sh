@@ -6,10 +6,14 @@
 #   - the packages in packages.yaml (currently: gh, tmux)
 #   - the Claude Code CLI
 #
+# Runs ubuntu-setup/verify.sh at the end to confirm everything above is
+# actually installed and on PATH; re-run verify.sh on its own any time.
+#
 # Usage (as root, right after SSH-ing into a fresh box):
 #   apt-get update && apt-get install -y git   # not preinstalled; needed to clone this repo
-#   git clone https://github.com/mzywang/dotfiles.git ~/.dotfiles
-#   ~/.dotfiles/ubuntu-setup/bootstrap.sh
+#   mkdir ~/mzywang && cd ~/mzywang
+#   git clone https://github.com/mzywang/dotfiles.git
+#   ./dotfiles/ubuntu-setup/bootstrap.sh
 #
 # You'll be prompted to set brewuser's password when it's created, and again
 # whenever brewuser's own sudo calls below need it (regular, password-backed
@@ -122,6 +126,14 @@ if ! command -v claude >/dev/null 2>&1; then
 fi
 
 echo
-echo "Done."
-echo "Open a new shell (or 'source ~/.bashrc') to pick up Homebrew and the Claude Code CLI."
-echo "Then run 'gh auth login' and 'claude' to finish signing in."
+echo "==> Verifying installs"
+if "$BOOTSTRAP_DIR/verify.sh"; then
+  echo
+  echo "Done."
+  echo "Open a new shell (or 'source ~/.bashrc') to pick up Homebrew and the Claude Code CLI."
+  echo "Then run 'gh auth login' and 'claude' to finish signing in."
+else
+  echo
+  echo "Done, but verify.sh found problems above (re-run ubuntu-setup/verify.sh any time to check again)."
+  exit 1
+fi
