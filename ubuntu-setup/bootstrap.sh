@@ -28,6 +28,11 @@
 # whenever brewuser's own sudo calls below need it (regular, password-backed
 # sudo — not passwordless). Everything below the "brewuser" setup runs as
 # brewuser, not root.
+#
+# After install/rebuild, future interactive root logins auto-drop into
+# brewuser (added to root's ~/.bashrc). For an actual root shell instead:
+#   touch /root/.no-autodrop   (permanent)
+#   ssh root@host bash --norc  (one-off)
 set -euo pipefail
 
 BREW_USER="brewuser"
@@ -53,6 +58,23 @@ if [[ "$(id -u)" -eq 0 ]]; then
       echo "==> Creating $BREW_USER (you'll be asked to set its password)"
       adduser --gecos "" "$BREW_USER"
       usermod -aG sudo "$BREW_USER"
+    fi
+
+    # Make future interactive root logins drop straight into brewuser, since
+    # that's where all the tools this script installs actually live.
+    ROOT_AUTODROP_MARKER="# Auto-drop into $BREW_USER"
+    if ! { [[ -f "$HOME/.bashrc" ]] && grep -qF "$ROOT_AUTODROP_MARKER" "$HOME/.bashrc"; }; then
+      echo "==> Making root logins drop into $BREW_USER automatically"
+      cat >> "$HOME/.bashrc" <<EOF
+
+$ROOT_AUTODROP_MARKER (bootstrap.sh's tools live there). Skip with:
+#   touch /root/.no-autodrop   (permanent)
+#   ssh root@host bash --norc  (one-off)
+if [[ \$- == *i* ]] && [[ ! -e /root/.no-autodrop ]] && id $BREW_USER &>/dev/null; then
+  echo "==> Dropping into $BREW_USER (touch /root/.no-autodrop to disable)"
+  exec su --pty - $BREW_USER
+fi
+EOF
     fi
   elif ! id -u "$BREW_USER" >/dev/null 2>&1; then
     echo "error: $BREW_USER doesn't exist — nothing to $ACTION" >&2

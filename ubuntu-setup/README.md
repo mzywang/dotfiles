@@ -40,3 +40,12 @@ Homebrew won't run as root, so running the script as root creates a
 `brewuser` account (you'll set its password) and does the rest of the
 install as that user. Already have a non-root sudo user? Run the script
 as that user instead and the `brewuser` step is skipped.
+
+After install/rebuild, future interactive root logins drop straight into
+`brewuser` (added to root's `~/.bashrc`) — that's where all the tools above
+live. Need an actual root shell instead?
+
+```sh
+touch /root/.no-autodrop   # permanent, until you rm it
+ssh root@host bash --norc  # one-off
+```
