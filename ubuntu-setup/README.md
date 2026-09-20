@@ -24,6 +24,13 @@ claude
 Homebrew, then via `brew`: `gh`, `tmux` ([`packages.yaml`](packages.yaml)).
 Also installs the Claude Code CLI. Safe to re-run.
 
+`bootstrap.sh` finishes by running `verify.sh`, which checks that everything
+above actually got installed and is on `PATH`. Re-run it any time on its own:
+
+```sh
+~/mzywang/dotfiles/ubuntu-setup/verify.sh
+```
+
 ## brewuser
 
 Homebrew won't run as root, so running the script as root creates a
