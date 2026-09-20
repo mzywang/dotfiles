@@ -48,7 +48,10 @@ if [[ "$(id -u)" -eq 0 ]]; then
   fi
 
   echo "==> Continuing as $BREW_USER"
-  su - "$BREW_USER" -c "$BREW_USER_DOTFILES/ubuntu-setup/bootstrap.sh"
+  # --pty: without it, the handed-off shell has no controlling terminal, so
+  # brewuser's own sudo calls below can't prompt for a password and fail
+  # with "sudo: a terminal is required to read the password".
+  su --pty - "$BREW_USER" -c "$BREW_USER_DOTFILES/ubuntu-setup/bootstrap.sh"
   exit $?
 fi
 
