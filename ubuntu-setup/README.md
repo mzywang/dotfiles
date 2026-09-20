@@ -32,6 +32,7 @@ Also installs the Claude Code CLI. Safe to re-run. Finishes by running
 - `--teardown` — uninstall Homebrew (and everything it installed: `gh`,
   `tmux`) and remove the Claude Code CLI. Leaves the `brewuser` account and
   its home directory alone.
+- `--rebuild` — `--teardown` immediately followed by a fresh install, in one run.
 
 ## brewuser
 
