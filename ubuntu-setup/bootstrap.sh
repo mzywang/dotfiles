@@ -21,6 +21,8 @@
 #               gh, tmux) and remove the Claude Code CLI. Does NOT delete
 #               the brewuser account or its home directory; that's left
 #               alone on purpose since it may hold work you want to keep.
+#   --rebuild   --teardown immediately followed by a fresh install, in one
+#               run.
 #
 # You'll be prompted to set brewuser's password when it's created, and again
 # whenever brewuser's own sudo calls below need it (regular, password-backed
@@ -35,11 +37,12 @@ case "${1:-}" in
   "") ;;
   --verify) ACTION="verify" ;;
   --teardown) ACTION="teardown" ;;
-  *) echo "error: unknown flag '$1' (expected --verify or --teardown)" >&2; exit 1 ;;
+  --rebuild) ACTION="rebuild" ;;
+  *) echo "error: unknown flag '$1' (expected --verify, --teardown, or --rebuild)" >&2; exit 1 ;;
 esac
 
 if [[ "$(id -u)" -eq 0 ]]; then
-  if [[ "$ACTION" == "install" ]]; then
+  if [[ "$ACTION" == "install" || "$ACTION" == "rebuild" ]]; then
     if ! command -v adduser >/dev/null 2>&1 || ! command -v sudo >/dev/null 2>&1 || ! command -v git >/dev/null 2>&1; then
       echo "==> Installing adduser/sudo/git"
       apt-get update -qq
@@ -59,14 +62,24 @@ if [[ "$(id -u)" -eq 0 ]]; then
   BOOTSTRAP_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
   DOTFILES_ROOT="$(cd "$BOOTSTRAP_DIR/.." && pwd)"
   BREW_USER_HOME="$(getent passwd "$BREW_USER" | cut -d: -f6)"
-  # Keep whatever name root cloned this repo under (e.g. ~/mzywang, ~/.dotfiles).
-  BREW_USER_DOTFILES="$BREW_USER_HOME/$(basename "$DOTFILES_ROOT")"
+
+  # Mirror this checkout's path relative to root's own $HOME under brewuser's
+  # $HOME too (e.g. ~/mzywang/dotfiles stays mzywang/dotfiles, not just
+  # dotfiles) so it lands in the same place you'd expect. Falls back to just
+  # the directory name if root cloned it somewhere outside $HOME.
+  if [[ "$DOTFILES_ROOT" == "$HOME"/* ]]; then
+    REL_DOTFILES="${DOTFILES_ROOT#"$HOME"/}"
+  else
+    REL_DOTFILES="$(basename "$DOTFILES_ROOT")"
+  fi
+  BREW_USER_DOTFILES="$BREW_USER_HOME/$REL_DOTFILES"
 
   # Give brewuser its own copy of this checkout so it doesn't need access
   # to wherever root cloned it (e.g. under /root, which brewuser can't read).
   if [[ "$DOTFILES_ROOT" != "$BREW_USER_DOTFILES" ]]; then
     echo "==> Copying dotfiles to $BREW_USER_DOTFILES"
     rm -rf "$BREW_USER_DOTFILES"
+    mkdir -p "$(dirname "$BREW_USER_DOTFILES")"
     cp -r "$DOTFILES_ROOT" "$BREW_USER_DOTFILES"
     chown -R "$BREW_USER:$BREW_USER" "$BREW_USER_DOTFILES"
   fi
@@ -89,7 +102,7 @@ fi
 BREW_BIN="/home/linuxbrew/.linuxbrew/bin/brew"
 [[ -x "$BREW_BIN" ]] || BREW_BIN="$HOME/.linuxbrew/bin/brew"
 
-if [[ "$ACTION" == "teardown" ]]; then
+teardown() {
   export NONINTERACTIVE=1
 
   if [[ -x "$BREW_BIN" ]]; then
@@ -113,10 +126,17 @@ if [[ "$ACTION" == "teardown" ]]; then
   else
     echo "==> Claude Code CLI not found on PATH, nothing to remove"
   fi
+}
 
+if [[ "$ACTION" == "teardown" || "$ACTION" == "rebuild" ]]; then
+  teardown
+  if [[ "$ACTION" == "teardown" ]]; then
+    echo
+    echo "Done. The $BREW_USER account and its home directory were left in place."
+    exit 0
+  fi
   echo
-  echo "Done. The $BREW_USER account and its home directory were left in place."
-  exit 0
+  echo "==> Rebuilding: reinstalling everything"
 fi
 
 # Extract a simple YAML list of "- item" entries under a top-level key.
