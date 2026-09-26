@@ -103,6 +103,15 @@ else
   missing "~/.config/nvim linked to $NVIM_SRC"
 fi
 
+# --- Timezone -----------------------------------------------------------------
+TIMEZONE="America/New_York"   # keep in sync with bootstrap.sh
+current_tz="$(timedatectl show --property=Timezone --value 2>/dev/null || true)"
+if [[ "$current_tz" == "$TIMEZONE" ]]; then
+  ok "timezone is $TIMEZONE"
+else
+  missing "timezone is $TIMEZONE (currently ${current_tz:-unknown})"
+fi
+
 # --- Claude Code CLI ---------------------------------------------------------
 resolved="$(command -v claude 2>/dev/null || true)"
 if [[ -n "$resolved" ]]; then

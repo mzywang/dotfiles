@@ -5,6 +5,7 @@
 #   - Homebrew (Linuxbrew)
 #   - the packages in packages.yaml (currently: gh, tmux, neovim)
 #   - ~/.config/nvim linked to this repo's ubuntu-setup/.config/nvim
+#   - the system timezone set to $TIMEZONE (America/New_York)
 #   - the Claude Code CLI
 #
 # Runs ubuntu-setup/verify.sh at the end to confirm everything above is
@@ -37,6 +38,7 @@
 set -euo pipefail
 
 BREW_USER="brewuser"
+TIMEZONE="America/New_York"
 
 ACTION="install"
 case "${1:-}" in
@@ -192,6 +194,14 @@ yaml_list() {
 echo "==> Installing apt prerequisites for Homebrew"
 sudo apt-get update
 sudo apt-get install -y build-essential procps curl file git
+
+# --- Timezone -----------------------------------------------------------------
+# Droplets default to UTC, which puts nvim's ,,d/,,t eng log stamps (and
+# everything else) hours off local time.
+if [[ "$(timedatectl show --property=Timezone --value 2>/dev/null)" != "$TIMEZONE" ]]; then
+  echo "==> Setting timezone to $TIMEZONE"
+  sudo timedatectl set-timezone "$TIMEZONE"
+fi
 
 # Run unattended: skip Homebrew's "press RETURN to continue" prompt and its
 # post-install environment hints.
