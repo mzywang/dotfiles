@@ -3,7 +3,8 @@
 # Bootstrap a fresh Ubuntu machine (e.g. a new DigitalOcean droplet) with:
 #   - a non-root "brewuser" account (Homebrew refuses to run as root)
 #   - Homebrew (Linuxbrew)
-#   - the packages in packages.yaml (currently: gh, tmux)
+#   - the packages in packages.yaml (currently: gh, tmux, neovim)
+#   - ~/.config/nvim linked to this repo's ubuntu-setup/.config/nvim
 #   - the Claude Code CLI
 #
 # Runs ubuntu-setup/verify.sh at the end to confirm everything above is
@@ -18,7 +19,7 @@
 # Flags (no flag = install):
 #   --verify    Just run verify.sh — same as running it directly.
 #   --teardown  Uninstall Homebrew (and everything installed through it —
-#               gh, tmux) and remove the Claude Code CLI. Does NOT delete
+#               gh, tmux, neovim) and remove the Claude Code CLI. Does NOT delete
 #               the brewuser account or its home directory; that's left
 #               alone on purpose since it may hold work you want to keep.
 #   --rebuild   --teardown immediately followed by a fresh install, in one
@@ -128,7 +129,7 @@ teardown() {
   export NONINTERACTIVE=1
 
   if [[ -x "$BREW_BIN" ]]; then
-    echo "==> Uninstalling Homebrew (takes gh, tmux, and everything else brew installed with it)"
+    echo "==> Uninstalling Homebrew (takes gh, tmux, neovim, and everything else brew installed with it)"
     /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/uninstall.sh)"
   else
     echo "==> Homebrew not installed, nothing to uninstall"
@@ -214,6 +215,24 @@ while IFS= read -r formula; do
   echo "==> $formula"
   brew install "$formula"
 done < <(yaml_list formulae)
+
+# --- Neovim config -----------------------------------------------------------
+# Symlink the whole directory so lazy.nvim's lazy-lock.json updates land back
+# in the repo. Anything already there is backed up first.
+NVIM_SRC="$BOOTSTRAP_DIR/.config/nvim"
+NVIM_DEST="$HOME/.config/nvim"
+if [[ -L "$NVIM_DEST" && "$(readlink "$NVIM_DEST")" == "$NVIM_SRC" ]]; then
+  echo "==> ~/.config/nvim already linked"
+else
+  mkdir -p "$HOME/.config"
+  if [[ -e "$NVIM_DEST" || -L "$NVIM_DEST" ]]; then
+    NVIM_BACKUP="$NVIM_DEST.backup-$(date +%Y%m%d-%H%M%S)"
+    echo "==> Backing up existing ~/.config/nvim to $NVIM_BACKUP"
+    mv "$NVIM_DEST" "$NVIM_BACKUP"
+  fi
+  echo "==> Linking ~/.config/nvim -> $NVIM_SRC"
+  ln -s "$NVIM_SRC" "$NVIM_DEST"
+fi
 
 # --- Claude Code CLI ----------------------------------------------------------
 if ! command -v claude >/dev/null 2>&1; then

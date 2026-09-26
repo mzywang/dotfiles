@@ -49,7 +49,7 @@ BREW_BIN="/home/linuxbrew/.linuxbrew/bin/brew"
 
 if [[ -x "$BREW_BIN" ]]; then
   ok "Homebrew installed ($BREW_BIN)"
-  # So the checks below see brew/gh/tmux even in a shell that hasn't
+  # So the checks below see brew/gh/tmux/nvim even in a shell that hasn't
   # sourced ~/.bashrc yet (e.g. this script run right after bootstrap.sh).
   eval "$("$BREW_BIN" shellenv)"
 else
@@ -73,20 +73,34 @@ if [[ -f "$PACKAGES_FILE" ]]; then
       missing "$formula installed (brew)"
     fi
 
-    resolved="$(command -v "$formula" 2>/dev/null || true)"
+    # The command a formula installs, when it isn't named after the formula.
+    case "$formula" in
+      neovim) cmd="nvim" ;;
+      *) cmd="$formula" ;;
+    esac
+
+    resolved="$(command -v "$cmd" 2>/dev/null || true)"
     if [[ -z "$resolved" ]]; then
-      missing "$formula on PATH"
+      missing "$cmd on PATH"
     elif [[ "$resolved" == "$BREW_PREFIX"/* ]]; then
-      ok "$formula on PATH ($resolved)"
+      ok "$cmd on PATH ($resolved)"
     else
       # Found, but not the Homebrew one — e.g. an apt-installed version
       # earlier on PATH. Not a hard failure, just worth flagging.
-      echo "WARN    $formula on PATH, but not from Homebrew ($resolved)"
+      echo "WARN    $cmd on PATH, but not from Homebrew ($resolved)"
       pass=$((pass + 1))
     fi
   done < <(yaml_list formulae)
 else
   missing "$PACKAGES_FILE found"
+fi
+
+# --- Neovim config ------------------------------------------------------------
+NVIM_SRC="$BOOTSTRAP_DIR/.config/nvim"
+if [[ -L "$HOME/.config/nvim" && "$(readlink "$HOME/.config/nvim")" == "$NVIM_SRC" ]]; then
+  ok "~/.config/nvim linked ($NVIM_SRC)"
+else
+  missing "~/.config/nvim linked to $NVIM_SRC"
 fi
 
 # --- Claude Code CLI ---------------------------------------------------------

@@ -3,5 +3,6 @@
 
 # Regular formulae, always installed (brew install is idempotent).
 formulae:
-  - gh    # GitHub CLI
-  - tmux  # terminal multiplexer
+  - gh      # GitHub CLI
+  - tmux    # terminal multiplexer
+  - neovim  # editor; config in .config/nvim, linked by bootstrap.sh
