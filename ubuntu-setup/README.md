@@ -21,7 +21,10 @@ claude
 
 ## Installs
 
-Homebrew, then via `brew`: `gh`, `tmux` ([`packages.yaml`](packages.yaml)).
+Homebrew, then via `brew`: `gh`, `tmux`, `neovim` ([`packages.yaml`](packages.yaml)).
+Links `~/.config/nvim` to [`.config/nvim`](.config/nvim), backing up anything
+already there. It's the macOS config without the clipboard commands
+(`:CopyRelPath`, `:CopyPwd`), since there's no system clipboard over SSH.
 Also installs the Claude Code CLI. Safe to re-run. Finishes by running
 `verify.sh` (see below).
 
@@ -30,7 +33,8 @@ Also installs the Claude Code CLI. Safe to re-run. Finishes by running
 - `--verify` — check that everything above is installed and on `PATH`,
   without installing anything. Same as running `verify.sh` directly.
 - `--teardown` — uninstall Homebrew (and everything it installed: `gh`,
-  `tmux`) and remove the Claude Code CLI. Leaves the `brewuser` account and
+  `tmux`, `neovim`) and remove the Claude Code CLI. The `~/.config/nvim`
+  link is left in place. Leaves the `brewuser` account and
   its home directory alone.
 - `--rebuild` — `--teardown` immediately followed by a fresh install, in one run.
 
