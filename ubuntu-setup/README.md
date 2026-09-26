@@ -25,6 +25,8 @@ Homebrew, then via `brew`: `gh`, `tmux`, `neovim` ([`packages.yaml`](packages.ya
 Links `~/.config/nvim` to [`.config/nvim`](.config/nvim), backing up anything
 already there. It's the macOS config without the clipboard commands
 (`:CopyRelPath`, `:CopyPwd`), since there's no system clipboard over SSH.
+Sets the system timezone to `America/New_York` (droplets default to UTC;
+change `TIMEZONE` in `bootstrap.sh` and `verify.sh` to use another).
 Also installs the Claude Code CLI. Safe to re-run. Finishes by running
 `verify.sh` (see below).
 
