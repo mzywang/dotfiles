@@ -105,6 +105,14 @@ EOF
     mkdir -p "$(dirname "$BREW_USER_DOTFILES")"
     cp -r "$DOTFILES_ROOT" "$BREW_USER_DOTFILES"
     chown -R "$BREW_USER:$BREW_USER" "$BREW_USER_DOTFILES"
+
+    # mkdir -p above creates any missing parents (e.g. ~/mzywang) as root.
+    # Hand those to brewuser too, so it can clone other repos next to this one.
+    parent="$(dirname "$BREW_USER_DOTFILES")"
+    while [[ "$parent" == "$BREW_USER_HOME"/* ]]; do
+      chown "$BREW_USER:$BREW_USER" "$parent"
+      parent="$(dirname "$parent")"
+    done
   fi
 
   echo "==> Continuing as $BREW_USER"
